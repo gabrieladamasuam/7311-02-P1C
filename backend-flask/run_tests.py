@@ -26,11 +26,14 @@ def run_tests():
     token = r.get_json()['access_token']
     headers = {'Authorization': f'Bearer {token}'}
 
-    # create a game
-    r = client.post('/games', json={'title': 'Test Game', 'genre': 'RPG'}, headers=headers)
+    # create a game (title plus url and image)
+    payload = {'title': 'Test Game', 'url': 'https://example.com/game', 'image': 'https://example.com/img.png'}
+    r = client.post('/games', json=payload, headers=headers)
     assert r.status_code == 201
     game = r.get_json()
     assert game['title'] == 'Test Game'
+    assert game['url'] == payload['url']
+    assert game['image'] == payload['image']
 
     # list games
     r = client.get('/games')

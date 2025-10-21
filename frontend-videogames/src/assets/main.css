@@ -1,0 +1,269 @@
+@import './base.css';
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Layout global */
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+main {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: var(--color-text);
+}
+
+/* Título principal */
+h1 {
+  font-family: 'Press Start 2P', cursive;
+  font-size: clamp(1.4rem, 2.5vw, 2.25rem);
+  text-align: center;
+  margin-bottom: 1.25rem;
+  color: var(--color-heading);
+}
+
+/* Enlaces */
+a {
+  text-decoration: none;
+  color: hsl(160 100% 60%);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsl(160 100% 40% / 0.18);
+  }
+}
+
+/* Panel de juegos: barra y grid */
+.game-panel .toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Buscador */
+.game-panel .search {
+  flex: 0 1 480px;
+  max-width: 480px;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  background: hsl(230, 25%, 20%);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.game-panel .search-icon {
+  margin-right: 8px;
+  opacity: 0.9;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+.game-panel .search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 1rem;
+  outline: none;
+}
+
+/* Estado vacío (sin resultados) */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--color-text);
+  opacity: 0.9;
+  padding: 1rem 0.5rem;
+}
+.empty-state .empty-image {
+  width: 520px;
+  max-width: 100vw;
+  height: auto;
+  border-radius: 8px;
+  margin: 0 auto 0.5rem;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+
+/* Filtros */
+.game-panel .filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.game-panel .filters label {
+  color: var(--color-text);
+  opacity: 0.9;
+}
+.game-panel .filters select {
+  padding: 8px 10px;
+  background: hsl(230, 25%, 20%);
+  color: var(--color-text);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 6px;
+}
+.game-panel .filters select:focus {
+  outline: 2px solid hsl(160 100% 60% / 0.5);
+  outline-offset: 2px;
+}
+
+/* Grid de tarjetas */
+.games {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin-top: 0.75rem;
+}
+@media (min-width: 1024px) {
+  .games { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Tarjeta de juego */
+.game-card {
+  border: 1px solid hsla(248, 53%, 58%, 0.4);
+  border-radius: 10px;
+  padding: 1rem;
+  background: linear-gradient(180deg, hsl(255, 35%, 35%) 0%, hsl(230, 25%, 20%) 100%);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: hsl(254, 100%, 97%);
+}
+.game-card .game-image {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  background: hsl(230, 25%, 20%);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.game-card h2 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: hsl(261, 74%, 93%);
+}
+.game-card p {
+  margin: 0.25rem 0;
+  color: hsl(261, 74%, 93%);
+}
+.game-card a {
+  margin-top: 0.25rem;
+  color: hsl(160 100% 70%);
+}
+
+/* Botón “Ver más”/Jugar (estilo de enlace) */
+.game-card .play-btn {
+  margin-top: 0.25rem;
+  color: hsl(160 100% 70%);
+  background: transparent;
+  border: none;
+  padding: 3px;
+  cursor: pointer;
+  font: inherit;
+}
+.game-card .play-btn:hover {
+  background-color: hsl(160 100% 40% / 0.18);
+}
+.game-card .play-btn:focus-visible {
+  outline: 2px solid hsl(160 100% 60% / 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* TicTacToe */
+.tictactoe {
+  margin: 2rem auto;
+  width: min(100%, 360px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.tictactoe h2 {
+  font-family: 'Press Start 2P', cursive;
+  color: var(--color-heading);
+  margin-bottom: 0.5rem;
+}
+.tictactoe .status { margin-bottom: 0.5rem; font-size: 1.1rem; }
+
+.tictactoe .board {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  gap: 10px;
+  margin: 1rem auto 1.25rem;
+}
+.tictactoe .board button {
+  width: 80px;
+  height: 80px;
+  font-size: 2.25rem;
+  font-family: 'Press Start 2P', cursive;
+  cursor: pointer;
+  background: hsl(229, 23%, 34%);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 6px;
+}
+.tictactoe .board button.cell-x { color: hsl(160 100% 70%); }
+.tictactoe .board button.cell-o { color: hsl(40, 100%, 70%); }
+.tictactoe .board button:hover { filter: brightness(1.08); }
+
+.tictactoe .result {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.tictactoe .result > span { font-size: 1.1rem; }
+
+/* Botones “Reiniciar” y “Volver”: mismo estilo que buscador/filtros */
+.tictactoe .reset,
+.back-btn {
+  color: var(--color-text);
+  background: hsl(230, 25%, 20%);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tictactoe .reset:hover,
+.back-btn:hover { filter: brightness(1.08); }
+.tictactoe .reset:focus-visible,
+.back-btn:focus-visible {
+  outline: 2px solid hsl(160 100% 60% / 0.5);
+  outline-offset: 2px;
+}
+
+/* Footer de keywords */
+.keywords-footer {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: var(--color-background-soft);
+  text-align: center;
+  font-size: 1rem;
+  color: var(--color-text);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+.keywords-footer strong {
+  color: hsl(160 100% 70%);
+  font-weight: 700;
+}

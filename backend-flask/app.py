@@ -23,17 +23,17 @@ class Game(db.Model):
     __tablename__ = 'games'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
-    genre = db.Column(db.String(80), nullable=True)
-    platform = db.Column(db.String(80), nullable=True)
     release_year = db.Column(db.Integer, nullable=True)
+    url = db.Column(db.String(500), nullable=True)
+    image = db.Column(db.String(500), nullable=True)
 
     def to_dict(self):
         return {
             'id': self.id,
             'title': self.title,
-            'genre': self.genre,
-            'platform': self.platform,
-            'release_year': self.release_year
+            'release_year': self.release_year,
+            'url': self.url,
+            'image': self.image
         }
 
 
@@ -100,9 +100,9 @@ def create_game():
         return jsonify({'msg': 'title is required'}), 400
     game = Game(
         title=title,
-        genre=data.get('genre'),
-        platform=data.get('platform'),
-        release_year=data.get('release_year')
+        release_year=data.get('release_year'),
+        url=data.get('url'),
+        image=data.get('image')
     )
     db.session.add(game)
     db.session.commit()
@@ -115,9 +115,9 @@ def update_game(game_id):
     game = Game.query.get_or_404(game_id)
     data = request.get_json() or {}
     game.title = data.get('title', game.title)
-    game.genre = data.get('genre', game.genre)
-    game.platform = data.get('platform', game.platform)
     game.release_year = data.get('release_year', game.release_year)
+    game.url = data.get('url', game.url)
+    game.image = data.get('image', game.image)
     db.session.commit()
     return jsonify(game.to_dict())
 

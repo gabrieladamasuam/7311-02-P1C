@@ -26,14 +26,23 @@ def run_tests():
     token = r.get_json()['access_token']
     headers = {'Authorization': f'Bearer {token}'}
 
-    # create a game (title plus url and image)
-    payload = {'title': 'Test Game', 'url': 'https://example.com/game', 'image': 'https://example.com/img.png'}
+    # create a game (use frontend-friendly keys 'name' and 'year')
+    payload = {
+        'name': 'Test Game',
+        'year': 2025,
+        'url': 'https://example.com/game',
+        'image': 'https://example.com/img.png',
+        'description': 'A test game'
+    }
     r = client.post('/games', json=payload, headers=headers)
     assert r.status_code == 201
     game = r.get_json()
     assert game['title'] == 'Test Game'
+    assert game['name'] == 'Test Game'
+    assert game['year'] == 2025
     assert game['url'] == payload['url']
     assert game['image'] == payload['image']
+    assert game['description'] == payload['description']
 
     # list games
     r = client.get('/games')
@@ -42,9 +51,10 @@ def run_tests():
     assert data['total'] == 1
 
     # update game
-    r = client.put(f"/games/{game['id']}", json={'title': 'Updated'}, headers=headers)
+    r = client.put(f"/games/{game['id']}", json={'name': 'Updated'}, headers=headers)
     assert r.status_code == 200
     assert r.get_json()['title'] == 'Updated'
+    assert r.get_json()['name'] == 'Updated'
 
     # delete game
     r = client.delete(f"/games/{game['id']}", headers=headers)

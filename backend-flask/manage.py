@@ -9,7 +9,9 @@ def cli():
 
 @cli.command('init-db')
 def init_db():
-    db.create_all()
+    # Ensure an application context is active when creating the database
+    with app.app_context():
+        db.create_all()
     print('Initialized the database.')
 
 

@@ -13,7 +13,16 @@ Requisitos
 - Python 3.8+
 - PostgreSQL si quieres usar una BBDD real (aka setear `DATABASE_URL` a una URL de Postgres)
 
-Instalación (entorno virtual recomendado)
+Instalación
+
+Sin entorno virtual (usar pip global):
+
+```bash
+python3 -m pip install --upgrade pip
+pip3 install -r requirements.txt
+```
+
+Con entorno virtual (recomendado):
 
 ```bash
 python -m venv .venv
@@ -50,4 +59,5 @@ python run_tests.py
 ```
 
 Notas
+- Para desarrollo esta API habilita CORS para permitir que el frontend (Vite) haga peticiones a `http://localhost:5000`.
 - Para producción usa una base de datos PostgreSQL real y configura las variables de entorno.

@@ -3,13 +3,21 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, get_jwt_identity
 )
+from flask_cors import CORS
 import os
 from datetime import timedelta
 
 app = Flask(__name__)
 
 # Config
-DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
+# Prefer an explicit DATABASE_URL environment variable. If it's not set,
+# default to a local PostgreSQL database named `videogames_db` using the
+# PGUSER or the current system user. This makes Postgres the default for
+# development when PostgreSQL is installed locally.
+default_db_user = os.environ.get('PGUSER') or os.environ.get('USER') or 'postgres'
+default_db_name = os.environ.get('PGDATABASE') or 'videogames_db'
+default_postgres_url = f'postgresql://{default_db_user}@localhost:5432/{default_db_name}'
+DATABASE_URL = os.environ.get('DATABASE_URL', default_postgres_url)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'dev-secret')
@@ -17,6 +25,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
+CORS(app)  # allow all origins by default (for dev). Restrict in production.
 
 
 class Game(db.Model):
@@ -26,14 +35,19 @@ class Game(db.Model):
     release_year = db.Column(db.Integer, nullable=True)
     url = db.Column(db.String(500), nullable=True)
     image = db.Column(db.String(500), nullable=True)
+    description = db.Column(db.Text, nullable=True)
 
     def to_dict(self):
+        # Provide both backend canonical keys and frontend-friendly aliases
         return {
             'id': self.id,
             'title': self.title,
+            'name': self.title,  # frontend expects 'name'
             'release_year': self.release_year,
+            'year': self.release_year,  # frontend expects 'year'
             'url': self.url,
-            'image': self.image
+            'image': self.image,
+            'description': self.description
         }
 
 
@@ -95,14 +109,16 @@ def get_game(game_id):
 @jwt_required()
 def create_game():
     data = request.get_json() or {}
-    title = data.get('title')
+    # accept either 'title' or frontend 'name'
+    title = data.get('title') or data.get('name')
     if not title:
         return jsonify({'msg': 'title is required'}), 400
     game = Game(
         title=title,
-        release_year=data.get('release_year'),
+        release_year=data.get('release_year') or data.get('year'),
         url=data.get('url'),
-        image=data.get('image')
+        image=data.get('image'),
+        description=data.get('description')
     )
     db.session.add(game)
     db.session.commit()
@@ -114,12 +130,19 @@ def create_game():
 def update_game(game_id):
     game = Game.query.get_or_404(game_id)
     data = request.get_json() or {}
-    game.title = data.get('title', game.title)
-    game.release_year = data.get('release_year', game.release_year)
+    game.title = data.get('title', data.get('name', game.title))
+    game.release_year = data.get('release_year', data.get('year', game.release_year))
     game.url = data.get('url', game.url)
     game.image = data.get('image', game.image)
+    game.description = data.get('description', game.description)
     db.session.commit()
     return jsonify(game.to_dict())
+
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'ok'})
 
 
 @app.route('/games/<int:game_id>', methods=['DELETE'])

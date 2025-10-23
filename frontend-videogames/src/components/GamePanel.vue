@@ -92,32 +92,38 @@ const showDebug = ref(false)
 async function loadGames() {
   // Always start with local bundle so it's visible even if backend is empty/unreachable
   const mapLocal = localGames.map(g => ({
-    id: g.id,
+    id: g.id != null ? Number(g.id) : null,
     name: g.name || '',
     description: g.description || '',
     year: Number(g.year || 0),
     image: g.image,
     url: g.url,
-    playableComponent: g.playableComponent
+    playableComponent: g.playableComponent,
+    localOnly: true
   }))
-  // use a map keyed by name (or id) so backend entries can override local ones
+  // use a map keyed by id when available, otherwise by name (to avoid duplicates when name changes)
   const merged = new Map()
-  mapLocal.forEach(g => merged.set(g.name || g.id, g))
+  mapLocal.forEach(g => {
+    const key = g.id != null ? `id:${g.id}` : `name:${g.name}`
+    merged.set(key, g)
+  })
 
   try {
     const res = await api.get('/games')
     if (res.data && Array.isArray(res.data.games)) {
       res.data.games.forEach(g => {
         const item = {
-          id: g.id,
+          id: g.id != null ? Number(g.id) : null,
           name: (g.name || g.title || '') + '',
           description: g.description || '',
           year: Number(g.year || g.release_year || 0),
           image: g.image,
           url: g.url,
-          playableComponent: g.playableComponent
+          playableComponent: g.playableComponent,
+          localOnly: false
         }
-        merged.set(item.name || item.id, item)
+        const key = item.id != null ? `id:${item.id}` : `name:${item.name}`
+        merged.set(key, item)
       })
       fallbackMessage.value = ''
     } else {
@@ -128,7 +134,26 @@ async function loadGames() {
     fallbackMessage.value = 'No se pudo conectar al backend — mostrando juegos locales'
   }
 
-  games.value = Array.from(merged.values())
+  // convert merged map to array and normalize ids to Number when possible
+  games.value = Array.from(merged.values()).map(it => ({
+    id: it.id != null ? Number(it.id) : undefined,
+    name: it.name,
+    description: it.description,
+    year: Number(it.year || 0),
+    image: it.image,
+    url: it.url,
+    playableComponent: it.playableComponent,
+    localOnly: !!it.localOnly
+  }))
+
+  // Debug: log loaded game names in dev mode to help diagnose missing entries
+  try {
+    if (import.meta.env.DEV) {
+      console.log('Loaded games:', games.value.map(g => ({ id: g.id, name: g.name, localOnly: g.localOnly })))
+    }
+  } catch (e) {
+    // ignore when import.meta not available in some environments
+  }
 }
 
 loadGames()

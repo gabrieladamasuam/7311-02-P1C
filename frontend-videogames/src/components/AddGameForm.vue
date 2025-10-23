@@ -69,8 +69,18 @@ async function submit() {
 
     if (isEditing.value) {
       // update
-      const res = await api.put(`/games/${props.game.id}`, payload)
-      emit('game-updated', res.data)
+      try {
+        const res = await api.put(`/games/${props.game.id}`, payload)
+        emit('game-updated', res.data)
+      } catch (err) {
+        // if the game does not exist on the backend (local-only), try creating it instead
+        if (err.response?.status === 404) {
+          const res = await api.post('/games', payload)
+          emit('game-updated', res.data)
+        } else {
+          throw err
+        }
+      }
     } else {
       const res = await api.post('/games', payload)
       emit('game-added', res.data)

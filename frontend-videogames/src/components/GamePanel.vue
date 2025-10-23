@@ -34,13 +34,9 @@
   <div v-else>
       <div class="auth-area" style="margin: 12px 0">
         <template v-if="loggedIn">
-          <!-- when editing, pass the selected game to the form -->
-          <AddGameForm
-            :game="editingGame"
-            @game-added="onGameAdded"
-            @game-updated="onGameUpdated"
-            @cancel-edit="cancelEdit"
-          />
+          <div style="display:flex; gap:8px; align-items:center">
+            <button class="back-btn" type="button" @click="openAddModal">Añadir juego</button>
+          </div>
         </template>
         <template v-else>
         </template>
@@ -64,8 +60,9 @@
         <p>No se encontraron juegos.</p>
       </div>
     </div>
-    </div>
-    <KeywordsFooter v-if="!showLoginView" :games="filteredAndSortedGames" />
+  </div>
+  <GameFormModal :open="modalOpen" :game="modalGame" @close="modalOpen = false" @saved="handleModalSaved" />
+  <KeywordsFooter v-if="!showLoginView" :games="filteredAndSortedGames" />
   </div>
 </template>
 
@@ -76,6 +73,7 @@ import KeywordsFooter from './KeywordsFooter.vue'
 import api from '@/services/api'
 import LoginForm from './LoginForm.vue'
 import AddGameForm from './AddGameForm.vue'
+import GameFormModal from './GameFormModal.vue'
 import localGames from '@/data/games.js'
 
 const search = ref('')
@@ -85,6 +83,8 @@ const emit = defineEmits(['play'])
 
 const games = ref([])
 const editingGame = ref(null)
+const modalOpen = ref(false)
+const modalGame = ref(null)
 const fallbackMessage = ref('')
 const showLoginView = ref(false)
 const showDebug = ref(false)
@@ -229,8 +229,36 @@ async function onDelete(game) {
 }
 
 function onEdit(game) {
-  editingGame.value = game
+  // open modal to edit the game
+  modalGame.value = game
+  modalOpen.value = true
   clearExpired()
+}
+
+function openAddModal() {
+  modalGame.value = null
+  modalOpen.value = true
+}
+
+function handleModalSaved(game) {
+  // if game has id and exists, update; else add
+  if (!game) return
+  const newId = Number(game.id)
+  const idx = games.value.findIndex(g => Number(g.id) === newId)
+  const updatedObj = {
+    id: newId,
+    name: game.name || game.title,
+    description: game.description || '',
+    year: game.year || game.release_year,
+    image: game.image,
+    url: game.url
+  }
+  if (idx !== -1) {
+    games.value.splice(idx, 1, updatedObj)
+  } else {
+    games.value.unshift(updatedObj)
+  }
+  modalOpen.value = false
 }
 
 function logout() {

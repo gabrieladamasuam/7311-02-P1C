@@ -12,83 +12,117 @@ Instrucciones rápidas (sin usar `.venv`)
 cd backend-flask
 # Si NO quieres usar el archivo `requirements.txt` (por ejemplo para evitar compilar psycopg2)
 # instala un subconjunto mínimo compatible con SQLite y desarrollo local:
-python3 -m pip install --upgrade pip
-# Instala sólo lo necesario para ejecutar el servidor con SQLite (no PostgreSQL):
-pip3 install Flask Flask-JWT-Extended Flask-SQLAlchemy Flask-Cors
+# Proyecto: Videogames + Backend Flask
 
-# Nota para macOS: si `pip3 install -r requirements.txt` falla compilando `psycopg2-binary`,
-# omite ese paquete o instala PostgreSQL y las herramientas de compilación necesarias.
-# Para desarrollo local con la base de datos SQLite no necesitas psycopg2.
-```
+Este repositorio contiene dos partes principales:
+
+- `frontend-videogames/`: aplicación Vue 3 (Vite) que muestra una lista de juegos y permite autenticarse, añadir, editar y borrar juegos desde la UI.
+- `backend-flask/`: API REST en Flask que gestiona usuarios y juegos con SQLAlchemy y JWT.
+
+Este README describe cómo ejecutar el proyecto en desarrollo, qué variables de entorno configurar y cómo probar las rutas principales.
 
 ---
 
-Si quieres usar PostgreSQL (recomendado para la entrega), sigue estos pasos mínimos:
+Requisitos principales
+- Node.js + npm (para el frontend)
+- Python 3.8+ (para el backend)
+- PostgreSQL (opcional — la app intenta crear la DB si `DATABASE_URL` apunta a Postgres). Para desarrollo local también se puede usar SQLite.
 
-Preparar una base de datos local (ejemplo con Homebrew):
+Ejecución rápida (desarrollo)
+
+Backend (Flask)
+
+1. Instala dependencias (recomendado en un entorno virtual):
 
 ```bash
-# instala y arranca Postgres (si no lo tienes)
-brew install postgresql
-brew services start postgresql
-
-# crea un usuario/DB (usa tu usuario o crea uno nuevo)
-createuser -s $(whoami) || true
-createdb videogames_db
+cd backend-flask
+python3 -m pip install --upgrade pip
+pip3 install -r requirements.txt
 ```
 
-Instala el driver PostgreSQL y dependencias de la app (recomendado `psycopg` v3):
+2. Inicializa la base de datos (opcional, `manage.py` hará CREATE TABLES):
 
 ```bash
-pip3 install psycopg[binary] Flask Flask-JWT-Extended Flask-SQLAlchemy Flask-Cors
-```
-
-Exporta la URL de la base de datos y crea las tablas:
-
-```bash
-export DATABASE_URL=postgresql://$(whoami)@localhost:5432/videogames_db
 python3 manage.py init-db
 ```
 
-Arranca la app:
+3. (Opcional) Crea el admin por defecto (username=admin, password=1234):
+
+```bash
+python3 manage.py create-admin
+```
+
+4. Arranca la API (por defecto usa `DATABASE_URL` si está definida, o Postgres local/SQLite):
 
 ```bash
 export FLASK_APP=app.py
 export FLASK_ENV=development
-flask run --host=0.0.0.0 --port=5000
+flask run --host=0.0.0.0 --port=5001
 ```
 
-2) Inicializar base de datos (por defecto SQLite `data.db`)
+Nota: en este repositorio la API se ha probado en puerto 5001 — ajusta `VITE_API_URL` en el frontend si cambias el puerto.
+
+Frontend (Vue + Vite)
+
+1. Instala dependencias y arranca el servidor de desarrollo:
 
 ```bash
-python manage.py init-db
-```
-
-3) Ejecutar servidor backend
-
-```bash
-# export DATABASE_URL=postgresql://user:pass@host:5432/dbname  # opcional
-export FLASK_APP=app.py
-export FLASK_ENV=development
-flask run --host=0.0.0.0 --port=5000
-```
-
-4) Ejecutar frontend (otra terminal)
-
-```bash
-cd ../frontend-videogames
+cd frontend-videogames
 npm install
 npm run dev
 ```
 
-5) Probar flujo
+2. El frontend busca la API en la variable `VITE_API_URL`. Por ejemplo, crea `frontend-videogames/.env` con:
 
-- Abrir `http://localhost:5173` (o la url indicada por Vite).
-- Si necesitas crear un usuario para obtener token:
-  - POST a `http://localhost:5000/auth/register` con `{username,password}`
-  - POST a `http://localhost:5000/auth/login` con `{username,password}` y guardar `access_token` en localStorage (la UI de login hace esto automáticamente).
-- Añadir juegos usando el formulario (requiere login para POST `/games`).
+```text
+VITE_API_URL=http://localhost:5001
+```
 
-Notas
-- Ejecutar pip globalmente puede requerir privilegios y no es recomendable para producción. Se recomienda usar un entorno virtual en entornos reales.
-- Si deseas usar PostgreSQL, configura `DATABASE_URL` antes de inicializar la BBDD.
+Endpoints relevantes (backend)
+- POST /auth/register — crear usuario (body: {username, password})
+- POST /auth/login — obtener access_token (body: {username, password})
+- GET /games — listar juegos (paginado: ?limit=&skip=)
+- POST /games — crear juego (JWT requerido y usuario debe ser admin)
+- PUT /games/:id — actualizar (admin)
+- DELETE /games/:id — eliminar (admin)
+- GET /health — estado de la API
+
+Notas sobre la base de datos
+- Por defecto el backend construye una URL Postgres local si no está `DATABASE_URL` definida: `postgresql://<user>@localhost:5432/videogames_db`.
+- La app intenta crear la base de datos en Postgres si no existe (best-effort). Si prefieres usar SQLite para desarrollo rápido, exporta `DATABASE_URL="sqlite:///dev.db"` antes de inicializar la DB.
+
+Autenticación y permisos
+- La API usa JWT (Flask-JWT-Extended). Las operaciones que modifican datos (POST/PUT/DELETE en `/games`) requieren un token válido y que el usuario tenga `is_admin = True`.
+- La UI mantiene el `access_token` en `localStorage` y lo manda en las peticiones Axios.
+
+Credenciales de ejemplo
+- Admin por defecto: `username=admin`, `password=1234` (si ejecutaste `python3 manage.py create-admin`).
+
+Ejemplos rápidos con curl
+
+Login y crear juego (ejemplo):
+
+```bash
+# login
+TOKEN=$(curl -s -X POST http://localhost:5001/auth/login -H "Content-Type: application/json" -d '{"username":"admin","password":"1234"}' | jq -r .access_token)
+
+# create game
+curl -s -X POST http://localhost:5001/games \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Mi Juego","release_year":2025,"description":"Prueba"}' | jq .
+```
+
+Desarrollo y notas finales
+- La UI siempre carga un conjunto local de juegos (`src/data/games.js`) como fallback para demostraciones. Si la API está disponible, sus juegos se fusionan con los locales.
+- Si algo falla (p. ej. `psycopg2` al instalar), puedes usar SQLite para desarrollo o instalar las herramientas necesarias para compilar drivers de Postgres en macOS.
+
+Si quieres, puedo:
+- añadir un endpoint `/auth/me` para que el frontend pueda verificar roles y mostrar/ocultar controles según `is_admin`.
+- crear scripts para poblar la BBDD con los juegos locales.
+
+---
+
+Fechas/autor
+
+- Generado automáticamente para este ejercicio (actualizado 2025-10-23)

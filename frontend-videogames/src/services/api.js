@@ -28,11 +28,16 @@ api.interceptors.response.use(
       } catch (e) {
         // ignore
       }
-      // dispatch a global event so the UI can react (logout, show message, etc.)
-      try {
-        window.dispatchEvent(new CustomEvent('auth-expired', { detail: { msg } }))
-      } catch (e) {
-        // no-op in non-browser env
+      // Do not dispatch a global auth-expired for failed login attempts (they will
+      // be handled locally by the LoginForm). Only dispatch for other endpoints.
+      const requestUrl = err.config?.url || ''
+      const isLogin = requestUrl.includes('/auth/login') || requestUrl.endsWith('/auth/login')
+      if (!isLogin) {
+        try {
+          window.dispatchEvent(new CustomEvent('auth-expired', { detail: { msg } }))
+        } catch (e) {
+          // no-op in non-browser env
+        }
       }
     }
     return Promise.reject(err)

@@ -1,9 +1,9 @@
 <template>
   <div class="add-game-form">
     <h3>{{ isEditing ? 'Editar juego' : 'Añadir juego' }}</h3>
-    <form @submit.prevent="submit">
+    <form ref="formEl" @submit.prevent="submit">
   <input class="form-field" v-model="form.name" placeholder="Título" required />
-  <input class="form-field" v-model.number="form.year" placeholder="Año" type="number" />
+  <input class="form-field" v-model.number="form.year" placeholder="Año" type="number" :min="MIN_YEAR" :max="MAX_YEAR" />
   <input class="form-field" v-model="form.url" placeholder="URL (opcional)" />
   <input class="form-field" v-model="form.image" placeholder="Imagen URL (opcional)" />
   <textarea class="form-field" v-model="form.description" placeholder="Descripción (opcional)"></textarea>
@@ -30,6 +30,9 @@ const emit = defineEmits(['game-added', 'game-updated', 'cancel-edit'])
 const form = reactive({ name: '', year: null, url: '', image: '', description: '' })
 const loading = ref(false)
 const error = ref(null)
+const MIN_YEAR = 1952
+const MAX_YEAR = 2025
+const formEl = ref(null)
 
 const isEditing = computed(() => !!props.game)
 
@@ -52,6 +55,10 @@ watch(() => props.game, (g) => {
 
 async function submit() {
   error.value = null
+  // Use native browser validation so the user sees the standard tooltip
+  if (formEl.value && !formEl.value.reportValidity()) {
+    return
+  }
   loading.value = true
   try {
     const payload = { title: form.name }

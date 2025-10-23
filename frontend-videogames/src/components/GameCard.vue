@@ -14,7 +14,7 @@
       </template>
     </div>
 
-    <div class="action-bottom">
+    <div class="action-bottom" v-if="canEdit">
       <button class="edit-btn" type="button" @click="emit('edit', game)">Editar</button>
       <button class="delete-btn" type="button" @click="emit('delete', game)">Borrar</button>
     </div>
@@ -23,7 +23,8 @@
 
 <script setup>
 defineProps({
-  game: { type: Object, required: true }
+  game: { type: Object, required: true },
+  canEdit: { type: Boolean, default: false }
 })
 const emit = defineEmits(['play', 'edit', 'delete'])
 

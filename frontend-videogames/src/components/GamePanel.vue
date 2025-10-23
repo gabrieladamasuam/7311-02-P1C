@@ -1,35 +1,50 @@
 <template>
   <div class="game-panel">
-    <div class="toolbar">
-      <div class="search">
-        <img src="/lupa.ico" class="search-icon" />
-        <input v-model.trim="search" placeholder="Buscar juegos..."/>
-      </div>
-      <div class="filters">
-        <label for="order-select">Filtrar por:</label>
-        <select id="order-select" v-model="sortOrder">
-          <option value="asc">Año ascendente</option>
-          <option value="desc">Año descendente</option>
-        </select>
+  <div v-if="!showLoginView" class="toolbar">
+      <div class="left">
+        <div class="search">
+          <img src="/lupa.ico" class="search-icon" />
+          <input v-model.trim="search" placeholder="Buscar juegos..."/>
+        </div>
+        <div class="filters">
+          <label for="order-select">Filtrar por:</label>
+          <select id="order-select" v-model="sortOrder">
+            <option value="asc">Año ascendente</option>
+            <option value="desc">Año descendente</option>
+          </select>
+          <div style="margin-left:8px">
+            <button v-if="!loggedIn" class="back-btn" type="button" @click="showLoginView = true">Login</button>
+            <button v-else class="back-btn" type="button" @click="logout">Logout</button>
+          </div>
+        </div>
       </div>
       
     </div>
   <div v-if="expiredMessage" style="color: red; margin-bottom:8px">{{ expiredMessage }}</div>
   <div v-if="fallbackMessage" style="color: #a0a0a0; margin-bottom:8px">{{ fallbackMessage }}</div>
-    <div class="auth-area" style="margin: 12px 0">
-      <template v-if="!loggedIn">
-        <LoginForm @logged-in="onLoggedIn" />
-      </template>
-      <template v-else>
-        <!-- when editing, pass the selected game to the form -->
-        <AddGameForm
-          :game="editingGame"
-          @game-added="onGameAdded"
-          @game-updated="onGameUpdated"
-          @cancel-edit="cancelEdit"
-        />
-      </template>
+
+    <div v-if="showLoginView" class="auth-view">
+      <div class="centered-login">
+        <div class="login-form-inner">
+          <LoginForm @logged-in="onLoggedIn" />
+        </div>
+      </div>
     </div>
+
+  <div v-else>
+      <div class="auth-area" style="margin: 12px 0">
+        <template v-if="loggedIn">
+          <!-- when editing, pass the selected game to the form -->
+          <AddGameForm
+            :game="editingGame"
+            @game-added="onGameAdded"
+            @game-updated="onGameUpdated"
+            @cancel-edit="cancelEdit"
+          />
+        </template>
+        <template v-else>
+        </template>
+      </div>
     <div class="games">
       
 
@@ -38,6 +53,7 @@
           v-for="game in filteredAndSortedGames"
           :key="game.id"
           :game="game"
+          :can-edit="loggedIn"
           @play="onPlay"
           @edit="onEdit"
           @delete="onDelete"
@@ -48,7 +64,8 @@
         <p>No se encontraron juegos.</p>
       </div>
     </div>
-    <KeywordsFooter :games="filteredAndSortedGames" />
+    </div>
+    <KeywordsFooter v-if="!showLoginView" :games="filteredAndSortedGames" />
   </div>
 </template>
 
@@ -69,6 +86,7 @@ const emit = defineEmits(['play'])
 const games = ref([])
 const editingGame = ref(null)
 const fallbackMessage = ref('')
+const showLoginView = ref(false)
 const showDebug = ref(false)
 
 async function loadGames() {
@@ -151,9 +169,11 @@ onBeforeUnmount(() => {
   window.removeEventListener('auth-expired', handleAuthExpired)
 })
 
+// When a user logs in, close the login view and reload games
 function onLoggedIn() {
   loggedIn.value = true
   clearExpired()
+  showLoginView.value = false
   loadGames()
 }
 
@@ -210,6 +230,13 @@ async function onDelete(game) {
 
 function onEdit(game) {
   editingGame.value = game
+  clearExpired()
+}
+
+function logout() {
+  try { localStorage.removeItem('access_token') } catch (e) {}
+  loggedIn.value = false
+  editingGame.value = null
   clearExpired()
 }
 

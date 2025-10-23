@@ -1,12 +1,11 @@
 <template>
-  <div class="login-form">
-    <h3>Login</h3>
-    <form @submit.prevent="login">
-      <input v-model="username" placeholder="Username" required />
-      <input v-model="password" placeholder="Password" type="password" required />
-      <button type="submit">Log in</button>
+  <div class="login-form centered-login">
+    <form @submit.prevent="login" class="login-form-inner">
+      <input class="form-field" v-model="username" placeholder="Username" required />
+      <input class="form-field" v-model="password" placeholder="Password" type="password" required />
+      <div style="text-align:center"><button type="submit" class="back-btn">Log in</button></div>
     </form>
-    <p v-if="error" style="color: red">{{ error }}</p>
+  <!-- errors are handled at GamePanel level -->
   </div>
 </template>
 

@@ -49,11 +49,47 @@ a {
   margin-bottom: 0.75rem;
 }
 
+/* toolbar layout: keep search and filters aligned, login sits to the right of filters */
+.game-panel .toolbar .left { display:flex; align-items:center; gap:0.75rem }
+.game-panel .toolbar .filters { display:flex; align-items:center; gap:8px }
+.game-panel .toolbar .filters > div { display:inline-flex }
+.game-panel .toolbar .filters .back-btn { height:36px; align-self:center }
+
+/* Login view: center and hide surrounding UI elements */
+.auth-view { display:flex; flex-direction:column; align-items:center; gap:12px; padding: 24px 0 }
+.centered-login { width: 100%; display:flex; justify-content:center }
+.login-form-inner { max-width: 520px; width: 100%; display:flex; flex-direction:column; gap:8px }
+.login-form-inner .form-field { width: 100% }
+.login-form .back-btn { align-self:center }
+.auth-view .back-btn { margin-top: 8px; }
+.auth-view .login-form-inner > div { width: 100% }
+
+/* Make login inputs visually match other .form-field elements */
+.login-form .form-field {
+  background: hsl(230, 25%, 20%);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--color-text);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.login-form .form-field::placeholder { color: rgba(255,255,255,0.35) }
+.login-form .form-field:focus { outline: 2px solid hsl(160 100% 60% / 0.45); outline-offset: 2px }
+/* disable chrome autofill yellow */
+.login-form .form-field:-webkit-autofill,
+.login-form .form-field:-webkit-autofill:hover,
+.login-form .form-field:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px hsl(230, 25%, 20%) inset !important;
+  box-shadow: 0 0 0px 1000px hsl(230, 25%, 20%) inset !important;
+  -webkit-text-fill-color: var(--color-text) !important;
+}
+
 /* Buscador */
 .game-panel .search {
-  flex: 0 1 480px;
-  max-width: 480px;
-  min-width: 240px;
+  /* allow the search box to flex but leave room for filters to sit on the same line */
+  flex: 1 1 420px;
+  max-width: 640px;
+  min-width: 200px;
   display: flex;
   align-items: center;
   background: hsl(230, 25%, 20%);
@@ -119,6 +155,7 @@ a {
   align-items: center;
   gap: 8px;
 }
+.game-panel .filters label { white-space: nowrap; display: inline-block }
 .game-panel .filters label {
   color: var(--color-text);
   opacity: 0.9;

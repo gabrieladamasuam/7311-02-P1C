@@ -39,8 +39,8 @@ const isEditing = computed(() => !!props.game)
 // populate form when editing
 watch(() => props.game, (g) => {
   if (g) {
-    form.name = g.name || g.title || ''
-    form.year = g.year || g.release_year || null
+    form.name = g.name || ''
+    form.year = g.year || null
     form.url = g.url || ''
     form.image = g.image || ''
     form.description = g.description || ''
@@ -61,8 +61,8 @@ async function submit() {
   }
   loading.value = true
   try {
-    const payload = { title: form.name }
-    if (form.year) payload.release_year = form.year
+  const payload = { name: form.name }
+  if (form.year) payload.year = form.year
     if (form.url) payload.url = form.url
     if (form.image) payload.image = form.image
     if (form.description) payload.description = form.description

@@ -2,7 +2,7 @@
 
 Este repositorio contiene dos partes principales:
 - `frontend-videogames/`: aplicación Vue 3 (Vite) que muestra una lista de juegos y permite añadirlos.
-- `backend-flask/`: API en Flask que gestiona los juegos con PostgreSQL/SQLite y autenticación JWT.
+- `backend-flask/`: API en Flask que gestiona los juegos con PostgreSQL y autenticación JWT.
 
 Instrucciones rápidas (sin usar `.venv`)
 
@@ -26,7 +26,7 @@ Este README describe cómo ejecutar el proyecto en desarrollo, qué variables de
 Requisitos principales
 - Node.js + npm (para el frontend)
 - Python 3.8+ (para el backend)
-- PostgreSQL (opcional — la app intenta crear la DB si `DATABASE_URL` apunta a Postgres). Para desarrollo local también se puede usar SQLite.
+- PostgreSQL (la aplicación requiere PostgreSQL; el backend intentará crear la base de datos indicada por `DATABASE_URL` si tiene privilegios).
 
 Ejecución rápida (desarrollo)
 
@@ -40,19 +40,19 @@ python3 -m pip install --upgrade pip
 pip3 install -r requirements.txt
 ```
 
-2. Inicializa la base de datos (opcional, `manage.py` hará CREATE TABLES):
+2. Inicializa la base de datos (opcional, `setup_db.py` hará CREATE TABLES):
 
 ```bash
-python3 manage.py init-db
+python3 setup_db.py init-db
 ```
 
 3. (Opcional) Crea el admin por defecto (username=admin, password=1234):
 
 ```bash
-python3 manage.py create-admin
+python3 setup_db.py create-admin
 ```
 
-4. Arranca la API (por defecto usa `DATABASE_URL` si está definida, o Postgres local/SQLite):
+4. Arranca la API (usa la `DATABASE_URL` definida, por defecto apunta a un Postgres local):
 
 ```bash
 export FLASK_APP=app.py
@@ -89,14 +89,14 @@ Endpoints relevantes (backend)
 
 Notas sobre la base de datos
 - Por defecto el backend construye una URL Postgres local si no está `DATABASE_URL` definida: `postgresql://<user>@localhost:5432/videogames_db`.
-- La app intenta crear la base de datos en Postgres si no existe (best-effort). Si prefieres usar SQLite para desarrollo rápido, exporta `DATABASE_URL="sqlite:///dev.db"` antes de inicializar la DB.
+-- La app intenta crear la base de datos en Postgres si no existe (best-effort). Asegúrate de que `DATABASE_URL` apunte a una instancia de Postgres disponible.
 
 Autenticación y permisos
 - La API usa JWT (Flask-JWT-Extended). Las operaciones que modifican datos (POST/PUT/DELETE en `/games`) requieren un token válido y que el usuario tenga `is_admin = True`.
 - La UI mantiene el `access_token` en `localStorage` y lo manda en las peticiones Axios.
 
 Credenciales de ejemplo
-- Admin por defecto: `username=admin`, `password=1234` (si ejecutaste `python3 manage.py create-admin`).
+- Admin por defecto: `username=admin`, `password=1234` (si ejecutaste `python3 setup_db.py create-admin`).
 
 Ejemplos rápidos con curl
 
@@ -114,8 +114,8 @@ curl -s -X POST http://localhost:5001/games \
 ```
 
 Desarrollo y notas finales
-- La UI siempre carga un conjunto local de juegos (`src/data/games.js`) como fallback para demostraciones. Si la API está disponible, sus juegos se fusionan con los locales.
-- Si algo falla (p. ej. `psycopg2` al instalar), puedes usar SQLite para desarrollo o instalar las herramientas necesarias para compilar drivers de Postgres en macOS.
+- La UI obtiene los datos exclusivamente desde la API del backend. No se usa un fallback local embebido por defecto.
+- Si algo falla al instalar los drivers de Postgres (`psycopg2`), instala las dependencias del sistema en macOS (por ejemplo: `brew install postgresql` o `brew install libpq`), y luego instala `psycopg2-binary` en el entorno Python.
 
 Si quieres, puedo:
 - añadir un endpoint `/auth/me` para que el frontend pueda verificar roles y mostrar/ocultar controles según `is_admin`.

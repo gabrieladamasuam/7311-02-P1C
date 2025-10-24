@@ -220,7 +220,7 @@ a {
   color: hsl(160 100% 70%);
 }
 
-/* Title/description/year inside the card (no inner boxed meta) */
+/* Name/description/year inside the card (no inner boxed meta) */
 .game-card h2 {
   margin: 0.5rem 0 0.25rem;
   font-size: 1.15rem;
@@ -362,3 +362,39 @@ a {
   color: hsl(160 100% 70%);
   font-weight: 700;
 }
+
+/* Component styles moved from single-file components to central stylesheet */
+
+/* Login form error banner (moved from LoginForm.vue) */
+.login-error {
+  color: #fff;
+  background: hsl(350, 60%, 35%);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Modal styles (moved from GameFormModal.vue) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+.modal-dialog {
+  width: min(760px, 96%);
+  background: var(--color-background, #0f0f12);
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.6);
+  padding: 16px;
+  color: var(--color-text);
+}
+.modal-header { display:flex; align-items:center; justify-content:space-between; gap:12px }
+.modal-header h3 { margin:0 }
+.close-btn { background:transparent; border:none; font-size:1.1rem; cursor:pointer; color:var(--color-text) }
+.modal-body { margin-top: 8px }

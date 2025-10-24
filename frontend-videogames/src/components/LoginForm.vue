@@ -6,7 +6,7 @@
       <div style="text-align:center">
         <button type="submit" class="back-btn">Log in</button>
       </div>
-      <!-- show a single prominent inline error directly under the button -->
+      <!-- mensaje de error en caso de fallo -->
       <div v-if="error" class="login-error" role="alert">{{ error }}</div>
     </form>
   </div>
@@ -29,20 +29,8 @@ async function login() {
     emit('logged-in')
   } catch (err) {
     error.value = err.response?.data?.msg || 'Login failed'
-    // also inform parent so it can show other global UI if needed
+    // emitir un error al padre para que pueda mostrar otra UI global si es necesario
     emit('login-error', error.value)
   }
 }
 </script>
-
-<style scoped>
-.login-error {
-  color: #fff;
-  background: hsl(350, 60%, 35%); /* same as delete button */
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-top: 12px;
-  font-weight: 600;
-  text-align: center;
-}
-</style>

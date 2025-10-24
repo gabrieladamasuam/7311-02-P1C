@@ -1,20 +1,27 @@
 import os
 import tempfile
 import json
-from app import app, db, User, Game
+from api import api, db, User, Game
 
 
 def setup_test_db():
-    # Use in-memory sqlite for tests
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['TESTING'] = True
-    with app.app_context():
+    # Use the DATABASE_URL environment variable for tests (Postgres).
+    # IMPORTANT: running tests will drop/create tables in the target DB, so
+    # point DATABASE_URL to a dedicated test database to avoid data loss.
+    database_url = os.environ.get('DATABASE_URL')
+    if not database_url:
+        raise RuntimeError('DATABASE_URL must be set to run tests (use a test Postgres DB)')
+    api.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    api.config['TESTING'] = True
+    with api.app_context():
+        # Ensure a clean schema for tests
+        db.drop_all()
         db.create_all()
 
 
 def run_tests():
     setup_test_db()
-    client = app.test_client()
+    client = api.test_client()
 
     # register a user
     r = client.post('/auth/register', json={'username': 'test', 'password': 'test'})
@@ -37,7 +44,6 @@ def run_tests():
     r = client.post('/games', json=payload, headers=headers)
     assert r.status_code == 201
     game = r.get_json()
-    assert game['title'] == 'Test Game'
     assert game['name'] == 'Test Game'
     assert game['year'] == 2025
     assert game['url'] == payload['url']
@@ -53,7 +59,6 @@ def run_tests():
     # update game
     r = client.put(f"/games/{game['id']}", json={'name': 'Updated'}, headers=headers)
     assert r.status_code == 200
-    assert r.get_json()['title'] == 'Updated'
     assert r.get_json()['name'] == 'Updated'
 
     # delete game

@@ -40,28 +40,5 @@ function onOverlayClick() {
 watch(() => props.open, (v) => {
   // no-op placeholder if we want to add focus logic later
 })
-</script>
 
-<style scoped>
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1200;
-}
-.modal-dialog {
-  width: min(760px, 96%);
-  background: var(--color-background, #0f0f12);
-  border-radius: 12px;
-  box-shadow: 0 14px 40px rgba(0,0,0,0.6);
-  padding: 16px;
-  color: var(--color-text);
-}
-.modal-header { display:flex; align-items:center; justify-content:space-between; gap:12px }
-.modal-header h3 { margin:0 }
-.close-btn { background:transparent; border:none; font-size:1.1rem; cursor:pointer; color:var(--color-text) }
-.modal-body { margin-top: 8px }
-</style>
+</script>

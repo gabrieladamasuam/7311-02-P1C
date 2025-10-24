@@ -72,9 +72,7 @@ import GameCard from './GameCard.vue'
 import KeywordsFooter from './KeywordsFooter.vue'
 import api from '@/services/api'
 import LoginForm from './LoginForm.vue'
-import AddGameForm from './AddGameForm.vue'
 import GameFormModal from './GameFormModal.vue'
-import localGames from '@/data/games.js'
 
 const search = ref('')
 const sortOrder = ref('asc')
@@ -82,56 +80,44 @@ const sortOrder = ref('asc')
 const emit = defineEmits(['play'])
 
 const games = ref([])
-const editingGame = ref(null)
 const modalOpen = ref(false)
 const modalGame = ref(null)
 const fallbackMessage = ref('')
 const showLoginView = ref(false)
-const showDebug = ref(false)
 
 async function loadGames() {
-  // Always start with local bundle so it's visible even if backend is empty/unreachable
-  const mapLocal = localGames.map(g => ({
-    id: g.id != null ? Number(g.id) : null,
-    name: g.name || '',
-    description: g.description || '',
-    year: Number(g.year || 0),
-    image: g.image,
-    url: g.url,
-    playableComponent: g.playableComponent,
-    localOnly: true
-  }))
-  // use a map keyed by id when available, otherwise by name (to avoid duplicates when name changes)
+  // Prefer backend as source-of-truth. Don't statically import any local bundle here.
+  // If the backend is unreachable we will show a clear fallback message; avoid
+  // referencing a local `data/games.js` so Vite doesn't require it at build time.
   const merged = new Map()
-  mapLocal.forEach(g => {
-    const key = g.id != null ? `id:${g.id}` : `name:${g.name}`
-    merged.set(key, g)
-  })
 
   try {
-    const res = await api.get('/games')
+  // request many items (backend paginates; default limit=10). Use a high
+  // limit for now so the UI shows all seeded games.
+  const res = await api.get('/games?limit=1000')
     if (res.data && Array.isArray(res.data.games)) {
       res.data.games.forEach(g => {
         const item = {
           id: g.id != null ? Number(g.id) : null,
-          name: (g.name || g.title || '') + '',
+          name: (g.name || '') + '',
           description: g.description || '',
-          year: Number(g.year || g.release_year || 0),
+          year: Number(g.year || 0),
           image: g.image,
           url: g.url,
           playableComponent: g.playableComponent,
-          localOnly: false
         }
         const key = item.id != null ? `id:${item.id}` : `name:${item.name}`
         merged.set(key, item)
       })
       fallbackMessage.value = ''
     } else {
-      fallbackMessage.value = 'Mostrando juegos locales (backend no devolvió juegos)'
+      fallbackMessage.value = 'Backend respondió sin datos; no hay juegos para mostrar.'
     }
   } catch (err) {
     console.error('Error loading games:', err)
-    fallbackMessage.value = 'No se pudo conectar al backend — mostrando juegos locales'
+    // Backend unreachable — do not attempt to import a local module here.
+    // Show an explicit message so the developer/user knows to seed or start the backend.
+    fallbackMessage.value = 'No se pudo conectar al backend — inicie/siembre el backend para ver juegos.'
   }
 
   // convert merged map to array and normalize ids to Number when possible
@@ -142,14 +128,13 @@ async function loadGames() {
     year: Number(it.year || 0),
     image: it.image,
     url: it.url,
-    playableComponent: it.playableComponent,
-    localOnly: !!it.localOnly
+    playableComponent: it.playableComponent
   }))
 
   // Debug: log loaded game names in dev mode to help diagnose missing entries
   try {
     if (import.meta.env.DEV) {
-      console.log('Loaded games:', games.value.map(g => ({ id: g.id, name: g.name, localOnly: g.localOnly })))
+      console.log('Loaded games:', games.value.map(g => ({ id: g.id, name: g.name })))
     }
   } catch (e) {
     // ignore when import.meta not available in some environments
@@ -183,7 +168,7 @@ function handleAuthExpired(e) {
   // clear state
   try { localStorage.removeItem('access_token') } catch (e) {}
   loggedIn.value = false
-  editingGame.value = null
+  modalGame.value = null
 }
 
 onMounted(() => {
@@ -208,35 +193,23 @@ function clearExpired() {
 }
 
 
-
-function onGameAdded(game) {
-  games.value.unshift({
-    id: game.id,
-    name: game.name || game.title,
-    description: game.description || '',
-    year: game.year || game.release_year,
-    image: game.image,
-    url: game.url
-  })
-}
-
 function onGameUpdated(game) {
   // find and replace
   const idx = games.value.findIndex(g => g.id === game.id)
-  const updated = {
-    id: game.id,
-    name: game.name || game.title,
-    description: game.description || '',
-    year: game.year || game.release_year,
-    image: game.image,
-    url: game.url
-  }
+    const updated = {
+      id: game.id,
+      name: game.name,
+      description: game.description || '',
+      year: game.year,
+      image: game.image,
+      url: game.url
+    }
   if (idx !== -1) games.value.splice(idx, 1, updated)
-  editingGame.value = null
+  modalGame.value = null
 }
 
 function cancelEdit() {
-  editingGame.value = null
+  modalGame.value = null
   clearExpired()
 }
 
@@ -244,7 +217,7 @@ async function onDelete(game) {
   try {
     if (!confirm(`Eliminar juego "${game.name}"?`)) return
     await api.delete(`/games/${game.id}`)
-    // remove locally
+    // eliminar localmente
     const idx = games.value.findIndex(g => g.id === game.id)
     if (idx !== -1) games.value.splice(idx, 1)
   } catch (err) {
@@ -254,7 +227,7 @@ async function onDelete(game) {
 }
 
 function onEdit(game) {
-  // open modal to edit the game
+  // Abrir modal para editar el juego
   modalGame.value = game
   modalOpen.value = true
   clearExpired()
@@ -266,15 +239,15 @@ function openAddModal() {
 }
 
 function handleModalSaved(game) {
-  // if game has id and exists, update; else add
+  // Si el juego tiene id y existe, actualizar; si no, añadir
   if (!game) return
   const newId = Number(game.id)
   const idx = games.value.findIndex(g => Number(g.id) === newId)
   const updatedObj = {
     id: newId,
-    name: game.name || game.title,
+    name: game.name,
     description: game.description || '',
-    year: game.year || game.release_year,
+    year: game.year,
     image: game.image,
     url: game.url
   }
@@ -289,7 +262,7 @@ function handleModalSaved(game) {
 function logout() {
   try { localStorage.removeItem('access_token') } catch (e) {}
   loggedIn.value = false
-  editingGame.value = null
+  modalGame.value = null
   clearExpired()
 }
 

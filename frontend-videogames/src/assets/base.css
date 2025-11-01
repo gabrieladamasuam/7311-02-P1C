@@ -34,6 +34,11 @@
   --color-text: #e2e4f3;
 
   --section-gap: 160px;
+  /* error colors */
+  --color-error: hsl(350 60% 35%);
+  --color-error-text: #ffffff;
+  /* success color (match 'Ver más' link color) */
+  --color-success: hsl(160 100% 70%);
 }
 
 *,

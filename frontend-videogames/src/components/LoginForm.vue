@@ -4,7 +4,7 @@
       <input class="form-field" v-model="username" placeholder="Usuario" required/>
       <input class="form-field" v-model="password" type="password" placeholder="Contraseña" required/>
 
-      <button type="submit" class="back-btn">Entrar</button>
+      <button type="submit" class="back-btn btn">Entrar</button>
 
       <p v-if="errorMsg" class="login-error" role="alert">
         {{ errorMsg }}
@@ -43,10 +43,3 @@ async function handleLogin() {
   }
 }
 </script>
-
-<style scoped>
-.login-error {
-  color: red;
-  margin-top: 10px;
-}
-</style>

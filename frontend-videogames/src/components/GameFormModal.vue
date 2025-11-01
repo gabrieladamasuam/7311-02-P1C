@@ -11,20 +11,18 @@
           <input class="form-field" v-model="form.name" placeholder="Título" required />
           <input class="form-field" v-model.number="form.year" type="number" min="1952" max="2025" placeholder="Año" />
 
-          <label>URL de imagen</label>
-          <input class="form-field" v-model="form.image" placeholder="https://... o nombre de fichero local" required />
+          <input class="form-field" v-model="form.image" placeholder="Ruta de imagen (debe haberse subido previamente)" required />
 
-          <label>URL del juego</label>
-          <input class="form-field" v-model="form.url" type="url" placeholder="https://enlace-al-juego.com" required />
+          <input class="form-field" v-model="form.url" type="url" placeholder="URL del juego" required />
 
           <textarea class="form-field" v-model="form.description" placeholder="Descripción (opcional)"></textarea>
 
-          <button class="back-btn" type="submit" :disabled="loading">
+          <button class="back-btn btn" type="submit" :disabled="loading">
             {{ loading ? 'Enviando...' : (isEditing ? 'Guardar' : 'Añadir') }}
           </button>
         </form>
 
-        <p v-if="errorMsg" style="color:red; margin-top:8px;">{{ errorMsg }}</p>
+        <p v-if="errorMsg" class="form-error">{{ errorMsg }}</p>
       </section>
     </div>
   </div>
@@ -66,7 +64,14 @@ async function handleSubmit() {
 
   loading.value = true
   try {
-    const payload = { ...form }
+    // En producción solo permitimos imágenes locales (no URLs externas)
+    if (form.image && (form.image.startsWith('http://') || form.image.startsWith('https://'))) {
+      throw new Error('Solo se permiten imágenes locales. Sube la imagen desde el modal "Añadir imagen" y usa el nombre de fichero o /images/<archivo>.')
+    }
+
+    // Normalizar la ruta de imagen: aceptar tanto "archivo.png" como "/images/archivo.png"
+    const imgName = form.image ? form.image.split('/').pop() : ''
+    const payload = { ...form, image: imgName ? `/images/${imgName}` : '' }
 
     const res = isEditing.value
       ? await api.put(`/games/${props.game.id}`, payload)

@@ -13,17 +13,23 @@
             <option value="asc">Año ascendente</option>
             <option value="desc">Año descendente</option>
           </select>
-          <div style="margin-left:8px">
-            <button v-if="!loggedIn" class="back-btn" @click="showLoginView = true">Login</button>
-            <button v-else class="back-btn" @click="logout">Logout</button>
-          </div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="auth-buttons" v-if="loggedIn">
+          <button class="back-btn btn" @click="openAddModal">Añadir juego</button>
+          <button class="back-btn btn" @click="imageModalOpen = true">Añadir imagen</button>
+        </div>
+        <div class="auth-controls">
+          <button v-if="!loggedIn" class="back-btn btn" @click="showLoginView = true">Login</button>
+          <button v-else class="back-btn btn" @click="logout">Logout</button>
         </div>
       </div>
     </div>
 
     <!-- Mensajes de error -->
-    <div v-if="expiredMessage" style="color:red; margin-bottom:8px">{{ expiredMessage }}</div>
-    <div v-if="fallbackMessage" style="color:#888; margin-bottom:8px">{{ fallbackMessage }}</div>
+    <div v-if="expiredMessage" class="message-expired">{{ expiredMessage }}</div>
+    <div v-if="fallbackMessage" class="message-fallback">{{ fallbackMessage }}</div>
 
     <!-- Vista de login -->
     <div v-if="showLoginView" class="auth-view">
@@ -36,12 +42,6 @@
 
     <!-- Vista principal -->
     <div v-else>
-      <div class="auth-area" style="margin: 12px 0">
-        <template v-if="loggedIn">
-          <button class="back-btn" @click="openAddModal">Añadir juego</button>
-          <button class="back-btn" @click="imageModalOpen = true">Añadir imagen</button>
-        </template>
-      </div>
 
       <!-- Lista de juegos -->
       <div class="games">
@@ -185,4 +185,5 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('auth-expired', handleAuthExpired)
 })
+
 </script>

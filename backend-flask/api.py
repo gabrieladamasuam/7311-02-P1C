@@ -16,7 +16,7 @@ default_db_user = 'postgres'
 default_db_pass = '1234'
 default_db_name = 'videogames_db'
 default_db_host = 'localhost'
-default_db_port = '5434'
+default_db_port = '5432'
 
 default_postgres_url = (
     f'postgresql://{default_db_user}:{default_db_pass}@{default_db_host}:{default_db_port}/{default_db_name}'

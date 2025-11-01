@@ -30,7 +30,7 @@ function exitGame() {
 
     <template v-else>
       <div class="game-container">
-        <button type="button" class="back-btn" @click="exitGame">Volver</button>
+  <button type="button" class="back-btn btn" @click="exitGame">Volver</button>
         <keep-alive>
           <component :is="activeComponent" />
         </keep-alive>

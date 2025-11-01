@@ -7,34 +7,40 @@
       </header>
       <section class="modal-body">
         <form @submit.prevent="uploadImage">
-          <input
-            type="file"
-            class="form-field"
-            @change="onFileChange"
-            accept="image/*"
-            required
-          />
-          <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
-            <button class="back-btn" type="submit" :disabled="loading">
+          <div class="file-picker">
+            <input
+              id="imageFile"
+              type="file"
+              class="file-input"
+              @change="onFileChange"
+              accept="image/*"
+              required
+            />
+            <label for="imageFile" class="file-label back-btn btn">Elegir imagen</label>
+            <span class="file-name" tabindex="0">{{ file ? file.name : 'No se ha seleccionado ningún archivo' }}</span>
+          </div>
+          <div class="file-hint">Formatos aceptados: png, jpg, jpeg, webp</div>
+          <div class="form-actions">
+            <button class="back-btn btn" type="submit" :disabled="loading">
               {{ loading ? 'Subiendo...' : 'Subir imagen' }}
             </button>
           </div>
         </form>
 
-        <p v-if="successMsg" style="color: lightgreen; margin-top: 8px;">
+        <p v-if="successMsg" class="form-success">
           {{ successMsg }}
         </p>
-        <p v-if="errorMsg" style="color: red; margin-top: 8px;">
+        <p v-if="errorMsg" class="form-error">
           {{ errorMsg }}
         </p>
 
-        <div v-if="imageUrl" style="margin-top: 10px; text-align: center;">
+        <div v-if="imageUrl" class="current-image">
           <img
             :src="imageUrl"
             alt="Vista previa"
-            style="max-width: 180px; border-radius: 8px; margin-bottom: 6px;"
+            class="preview-img"
           />
-          <p style="font-size: 0.9rem;">
+          <p class="small-note">
             Ruta de imagen: <code>{{ imageUrl }}</code>
           </p>
         </div>

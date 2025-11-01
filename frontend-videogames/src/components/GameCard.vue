@@ -15,8 +15,8 @@
     </div>
 
     <div class="action-bottom" v-if="canEdit">
-      <button class="edit-btn" type="button" @click="emit('edit', game)">Editar</button>
-      <button class="delete-btn" type="button" @click="emit('delete', game)">Borrar</button>
+      <button class="edit-btn btn" type="button" @click="emit('edit', game)">Editar</button>
+      <button class="delete-btn btn" type="button" @click="emit('delete', game)">Borrar</button>
     </div>
   </div>
 </template>

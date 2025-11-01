@@ -6,7 +6,7 @@
         <button class="close-btn" @click="close">✕</button>
       </header>
       <section class="modal-body">
-        <form @submit.prevent="uploadImage">
+        <form @submit.prevent="uploadImage" class="add-image-form">
           <div class="file-picker">
             <input
               id="imageFile"
@@ -24,13 +24,14 @@
             <button class="back-btn btn" type="submit" :disabled="loading">
               {{ loading ? 'Subiendo...' : 'Subir imagen' }}
             </button>
+            <button type="button" class="btn-danger back-btn btn" @click="close">Cancelar</button>
           </div>
         </form>
 
-        <p v-if="successMsg" class="form-success">
+        <p v-if="successMsg" class="alert alert--success">
           {{ successMsg }}
         </p>
-        <p v-if="errorMsg" class="form-error">
+        <p v-if="errorMsg" class="alert alert--danger">
           {{ errorMsg }}
         </p>
 

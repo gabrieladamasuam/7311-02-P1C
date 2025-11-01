@@ -5,24 +5,21 @@
         <h3>{{ isEditing ? 'Editar juego' : 'Añadir juego' }}</h3>
         <button class="close-btn" @click="close">✕</button>
       </header>
-
       <section class="modal-body">
         <form ref="formEl" @submit.prevent="handleSubmit" class="add-game-form">
           <input class="form-field" v-model="form.name" placeholder="Título" required />
           <input class="form-field" v-model.number="form.year" type="number" min="1952" max="2025" placeholder="Año" />
-
           <input class="form-field" v-model="form.image" placeholder="Ruta de imagen (debe haberse subido previamente)" required />
-
           <input class="form-field" v-model="form.url" type="url" placeholder="URL del juego" required />
-
           <textarea class="form-field" v-model="form.description" placeholder="Descripción (opcional)"></textarea>
-
-          <button class="back-btn btn" type="submit" :disabled="loading">
-            {{ loading ? 'Enviando...' : (isEditing ? 'Guardar' : 'Añadir') }}
-          </button>
+          <div class="form-actions">
+            <button class="back-btn btn" type="submit" :disabled="loading">
+              {{ loading ? 'Enviando...' : (isEditing ? 'Guardar' : 'Añadir') }}
+            </button>
+            <button type="button" class="btn-danger back-btn btn" @click="close">Cancelar</button>
+          </div>
         </form>
-
-        <p v-if="errorMsg" class="form-error">{{ errorMsg }}</p>
+  <p v-if="errorMsg" class="alert alert--danger">{{ errorMsg }}</p>
       </section>
     </div>
   </div>

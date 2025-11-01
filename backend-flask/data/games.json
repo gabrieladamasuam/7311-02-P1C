@@ -1,13 +1,5 @@
 [
   {
-    "id": 0,
-    "name": "Tres en Raya",
-    "description": "El clásico juego de estrategia de toda la vida. Perfecto para retar desde aquí mismo a un amigo y ver quién consigue alinear tres fichas primero.",
-    "year": 2025,
-    "image": "/frontend-videogames/public/images/tictactoe.png",
-    "playableComponent": "TicTacToe"
-  },
-  {
     "id": 1,
     "name": "Hollow Knight: Silksong",
     "description": "Secuela del aclamado Metroidvania: una aventura más difícil, con nuevas habilidades y secretos por descubrir.",

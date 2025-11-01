@@ -6,7 +6,7 @@
 
       <button type="submit" class="back-btn btn">Entrar</button>
 
-      <p v-if="errorMsg" class="login-error" role="alert">
+      <p v-if="errorMsg" class="alert alert--danger" role="alert">
         {{ errorMsg }}
       </p>
     </form>

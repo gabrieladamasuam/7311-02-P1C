@@ -19,7 +19,7 @@ main {
 /* Título principal */
 h1 {
   font-family: 'Press Start 2P', cursive;
-  font-size: clamp(1.4rem, 2.5vw, 2.25rem);
+  font-size: var(--font-xlarge);
   text-align: center;
   margin-bottom: 1.25rem;
   color: var(--color-heading);
@@ -49,13 +49,26 @@ a {
   margin-bottom: 0.75rem;
 }
 
-/* toolbar layout: keep search and filters aligned, login sits to the right of filters */
+/* Disposición de la barra superior: mantener buscador y filtros alineados; el login queda a la derecha de los filtros */
 .game-panel .toolbar .left { display:flex; align-items:center; gap:0.75rem }
 .game-panel .toolbar .filters { display:flex; align-items:center; gap:8px }
 .game-panel .toolbar .filters > div { display:inline-flex }
 .game-panel .toolbar .filters .back-btn { height:36px; align-self:center }
 
-/* Login view: center and hide surrounding UI elements */
+/* Asegurar que los botones de la parte derecha de la toolbar estén en la misma línea y con separación */
+.game-panel .toolbar .right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.game-panel .toolbar .right .auth-buttons,
+.game-panel .toolbar .right .auth-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Vista de login: centrar y ocultar elementos circundantes */
 .auth-view { display:flex; flex-direction:column; align-items:center; gap:12px; padding: 24px 0 }
 .centered-login { width: 100%; display:flex; justify-content:center }
 .login-form-inner { max-width: 520px; width: 100%; display:flex; flex-direction:column; gap:8px }
@@ -64,18 +77,17 @@ a {
 .auth-view .back-btn { margin-top: 8px; }
 .auth-view .login-form-inner > div { width: 100% }
 
-/* Make login inputs visually match other .form-field elements */
+/* Hacer que los inputs del login visualmente coincidan con otros .form-field */
 .login-form .form-field {
   background: hsl(230, 25%, 20%);
   border: 1px solid rgba(255,255,255,0.12);
   color: var(--color-text);
   padding: 10px 12px;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: var(--font-base);
 }
 .login-form .form-field::placeholder { color: rgba(255,255,255,0.35) }
 .login-form .form-field:focus { outline: 2px solid hsl(160 100% 60% / 0.45); outline-offset: 2px }
-/* disable chrome autofill yellow */
 .login-form .form-field:-webkit-autofill,
 .login-form .form-field:-webkit-autofill:hover,
 .login-form .form-field:-webkit-autofill:focus {
@@ -86,7 +98,7 @@ a {
 
 /* Buscador */
 .game-panel .search {
-  /* allow the search box to flex but leave room for filters to sit on the same line */
+  /* permitir que el buscador haga flex pero dejar espacio para que los filtros estén en la misma línea */
   flex: 1 1 420px;
   max-width: 640px;
   min-width: 200px;
@@ -109,11 +121,11 @@ a {
   border: none;
   background: transparent;
   color: var(--color-text);
-  font-size: 1rem;
+  font-size: var(--font-base);
   outline: none;
 }
 
-/* Form fields (use same visual language as search input) */
+/* Campos de formulario (usar el mismo lenguaje visual que el buscador) */
 .form-field {
   display: block;
   width: 100%;
@@ -123,11 +135,10 @@ a {
   color: var(--color-text);
   padding: 8px 10px;
   border-radius: 8px;
-  margin-bottom: 8px;
   outline: none;
-  /* Ensure form inputs/textareas use the same site font and sizing */
+  /* Asegurar que los inputs/textarea del formulario usen la misma tipografía y tamaño del sitio */
   font-family: inherit;
-  font-size: 1rem;
+  font-size: var(--font-base);
   line-height: 1.4;
 }
 .form-field:focus {
@@ -135,6 +146,11 @@ a {
   outline-offset: 2px;
 }
 .add-game-form textarea.form-field { min-height: 80px }
+
+/* Espaciado específico para formularios 'Añadir juego' y 'Añadir imagen' */
+.add-game-form .form-field { margin-bottom: 12px; }
+.add-image-form .file-picker { margin-bottom: 14px; }
+.add-image-form .form-actions { margin-top: 12px; }
 
 /* Estado vacío (sin resultados) */
 .empty-state {
@@ -145,7 +161,7 @@ a {
   padding: 1rem 0.5rem;
 }
 .empty-state .empty-image {
-  width: 520px;
+  /* permitir que el buscador haga flex pero dejar espacio para los filtros en la misma línea */
   max-width: 100vw;
   height: auto;
   border-radius: 8px;
@@ -173,7 +189,6 @@ a {
 }
 .game-panel .filters select:focus {
   outline: 2px solid hsl(160 100% 60% / 0.5);
-  outline-offset: 2px;
 }
 
 /* Grid de tarjetas */
@@ -193,7 +208,7 @@ a {
   border-radius: 10px;
   padding: 1rem;
   background: linear-gradient(180deg, hsl(255, 35%, 35%) 0%, hsl(230, 25%, 20%) 100%);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  /* Nombre/descripcion/año dentro de la tarjeta (sin caja interna) */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -209,12 +224,7 @@ a {
   background: hsl(230, 25%, 20%);
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
-.game-card h2 {
-  margin: 0.5rem 0 0.25rem;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: hsl(261, 74%, 93%);
-}
+/* Maquetación de acciones: 'Ver más' encima de editar/borrar */
 .game-card p {
   margin: 0.25rem 0;
   color: hsl(261, 74%, 93%);
@@ -224,7 +234,7 @@ a {
   color: hsl(160 100% 70%);
 }
 
-/* Name/description/year inside the card (no inner boxed meta) */
+/* Nombre/descripcion/año dentro de la tarjeta (sin caja interna) */
 .game-card h2 {
   margin: 0.5rem 0 0.25rem;
   font-size: 1.15rem;
@@ -242,7 +252,7 @@ a {
   opacity: 0.9;
 }
 
-/* Action layout: Ver más above edit/delete */
+/* Maquetación de acciones: 'Ver más' encima de editar/borrar */
 .game-card .action-top {
   margin-top: 10px;
 }
@@ -255,108 +265,58 @@ a {
 .game-card .delete-btn {
   background: hsl(230, 25%, 20%);
   border: 1px solid rgba(255,255,255,0.12);
-  padding: 6px 8px;
-  border-radius: 6px;
-  cursor: pointer;
   color: var(--color-text);
 }
 .game-card .delete-btn { background: hsl(350, 60%, 35%); color: #fff; border-color: rgba(255,255,255,0.06) }
 .game-card .edit-btn:hover, .game-card .delete-btn:hover { filter: brightness(1.06) }
 
-/* Botón “Ver más”/Jugar (estilo de enlace) */
-.game-card .play-btn {
-  margin-top: 0.25rem;
-  color: hsl(160 100% 70%);
+/* Botón base reutilizable para toda la UI */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--color-text);
   background: transparent;
   border: none;
-  padding: 3px;
-  cursor: pointer;
-  font: inherit;
-}
-.game-card .play-btn:hover {
-  background-color: hsl(160 100% 40% / 0.18);
-}
-.game-card .play-btn:focus-visible {
-  outline: 2px solid hsl(160 100% 60% / 0.6);
-  outline-offset: 2px;
-  border-radius: 4px;
+  font-size: var(--font-base);
 }
 
-/* TicTacToe */
-.tictactoe {
-  margin: 2rem auto;
-  width: min(100%, 360px);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* Botón de peligro (utilidad compartida con botones de borrado) */
+.btn-danger {
+  background: hsl(350, 60%, 35%);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.06);
 }
-.tictactoe h2 {
-  font-family: 'Press Start 2P', cursive;
-  color: var(--color-heading);
-  margin-bottom: 0.5rem;
-}
-.tictactoe .status { margin-bottom: 0.5rem; font-size: 1.1rem; }
+.btn-danger:hover { filter: brightness(1.06) }
 
-.tictactoe .board {
-  display: grid;
-  grid-template-columns: repeat(3, 80px);
-  gap: 10px;
-  margin: 1rem auto 1.25rem;
-}
-.tictactoe .board button {
-  width: 80px;
-  height: 80px;
-  font-size: 2.25rem;
-  font-family: 'Press Start 2P', cursive;
-  cursor: pointer;
-  background: hsl(229, 23%, 34%);
-  border: 1px solid rgba(255,255,255,0.22);
-  border-radius: 6px;
-}
-.tictactoe .board button.cell-x { color: hsl(160 100% 70%); }
-.tictactoe .board button.cell-o { color: hsl(40, 100%, 70%); }
-.tictactoe .board button:hover { filter: brightness(1.08); }
-
-.tictactoe .result {
-  margin-top: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.tictactoe .result > span { font-size: 1.1rem; }
-
-/* Botones “Reiniciar” y “Volver”: mismo estilo que buscador/filtros */
-.tictactoe .reset,
+/* Botón 'volver' — mantener lenguaje visual consistente con filtros/buscador */
 .back-btn {
-  color: var(--color-text);
   background: hsl(230, 25%, 20%);
   border: 1px solid rgba(255,255,255,0.22);
   border-radius: 8px;
   padding: 8px 10px;
-  cursor: pointer;
-  font-size: 1rem;
 }
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.tictactoe .reset:hover,
 .back-btn:hover { filter: brightness(1.08); }
-.tictactoe .reset:focus-visible,
-.back-btn:focus-visible {
-  outline: 2px solid hsl(160 100% 60% / 0.5);
-  outline-offset: 2px;
-}
+.back-btn:focus-visible { outline: 2px solid hsl(160 100% 60% / 0.5); outline-offset: 2px; }
 
-/* Footer de keywords */
+/* Garantizar que .btn-danger conserve su estilo de 'peligro' incluso cuando se combine con .back-btn */
+.back-btn.btn-danger {
+  background: hsl(350 60% 35%);
+  color: #fff;
+  border-color: rgba(255,255,255,0.06);
+}
+.back-btn.btn-danger:hover { filter: brightness(1.06) }
+
+/* Pie de página de keywords */
 .keywords-footer {
   margin-top: 2rem;
   padding: 1rem;
   background: var(--color-background-soft);
   text-align: center;
-  font-size: 1rem;
+  font-size: var(--font-base);
   color: var(--color-text);
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
@@ -367,22 +327,29 @@ a {
   font-weight: 700;
 }
 
-/* Component styles moved from single-file components to central stylesheet */
-
-/* Login form error banner (moved from LoginForm.vue) */
-.login-error {
-  color: var(--color-error-text);
-  background: var(--color-error);
-  padding: 10px 14px;
-  border-radius: 8px;
-  margin: 12px auto;
-  font-weight: 700;
-  text-align: center;
-  font-size: 1.05rem;
+/* Alertas reutilizables */
+.alert {
   max-width: 720px;
+  margin: 12px auto;
+  padding: 10px 14px;
+  text-align: center;
+  font-weight: 700;
+  border-radius: 8px;
 }
 
-/* Modal styles (moved from GameFormModal.vue) */
+/* Variante de alerta: peligro/errores */
+.alert--danger {
+  background: var(--color-error);
+  color: var(--color-error-text);
+}
+
+/* Variante de alerta: éxito (texto en verde, fondo transparente) */
+.alert--success {
+  background: transparent;
+  color: var(--color-success);
+  font-weight: 600;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -405,86 +372,75 @@ a {
 .close-btn { background:transparent; border:none; font-size:1.1rem; cursor:pointer; color: hsl(160 100% 70%); }
 .modal-body { margin-top: 8px }
 
-/* Unified form status messages used across components */
-.form-success { color: lightgreen; margin-top: 8px }
+/* Mensajes de estado unificados para formularios usados en varios componentes */
 .form-error { color: var(--color-error); margin-top: 8px }
 
-/* Center status messages inside modals */
-.form-success, .form-error { text-align: center; display: block }
-.form-success { color: var(--color-success) }
-
-/* Generic form-actions layout used by modals */
-.form-actions { display:flex; gap:8px; align-items:center; margin-top:8px }
-.form-actions > .btn { display: inline-flex }
-
-/* Current image preview used in GameFormModal and AddImageForm */
-.current-image { margin-top: 10px; text-align: center }
-.current-image img { max-width: 160px; max-height: 120px; display:block; margin:0 auto 6px; border-radius:6px }
-
-/* File picker styling used by AddImageForm */
-.file-picker {
+/* Sugerencia de formato (AddImageForm): centrado y en gris */
+.file-hint {
+  text-align: center;
+  color: rgba(255,255,255,0.62);
   width: 100%;
-  display: flex;
-  gap: 12px;
-  align-items: center;
+  margin: 6px 0 6px 0;
+  font-size: 0.98rem;
 }
-.file-input { position: absolute; left: -9999px; }
+
+/* Selector de fichero (estilizado) usado en AddImageForm */
+.file-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.file-input {
+  /* ocultar visualmente el input nativo, mantener accesible para lectores */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
 .file-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
   background: hsl(230, 25%, 20%);
   border: 1px solid rgba(255,255,255,0.12);
   color: var(--color-text);
-  padding: 8px 12px;
-  border-radius: 8px;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
 }
-.file-name { color: var(--color-text); opacity: 0.95; user-select: text; }
-.file-name.placeholder { color: rgba(255,255,255,0.55); user-select: text }
-.file-hint { font-size: 0.9rem; color: rgba(255,255,255,0.45); margin-top: 8px; text-align: center }
-
-/* Ensure the 'Elegir imagen' label matches the size of the upload button */
-.form-actions > .btn,
-.file-label.back-btn.btn {
-  min-width: 140px;
-  justify-content: center;
-  /* enforce identical sizing and typography */
-  height: 40px;
-  padding: 8px 12px;
-  font-size: 1rem;
-  line-height: 1;
-  font-family: inherit;
-  font-weight: 400;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* Small note and image path: use site font instead of monospace and make the path visually lighter */
-.small-note { color: var(--color-text); opacity: 0.95; font-family: inherit; margin-top: 8px }
-.small-note code {
-  font-family: inherit; /* remove browser monospace for inline code */
-  background: rgba(255,255,255,0.03);
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.95rem;
+.file-name {
   color: var(--color-text);
+  opacity: 0.95;
+  font-size: 0.98rem;
 }
 
-/* Small utilities used by GamePanel */
-.game-panel .auth-controls { margin-left: auto }
-.game-panel .toolbar .right { display:flex; align-items:center; gap:8px }
-.game-panel .toolbar .auth-controls,
-.game-panel .toolbar .auth-buttons { display:flex; gap:8px; align-items:center }
-.message-expired {
-  color: var(--color-error-text);
-  background: var(--color-error);
-  padding: 10px 14px;
-  border-radius: 8px;
-  margin: 12px auto 8px;
-  font-weight: 700;
+/* Vista previa de la imagen subida: usar el mismo lenguaje visual que las tarjetas */
+.current-image {
+  margin-top: 12px;
   text-align: center;
-  font-size: 1.05rem;
-  max-width: 720px;
 }
-.message-fallback { color: #888; margin-bottom: 8px }
-.auth-area { margin: 12px 0 }
+.current-image .preview-img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin: 0 auto 8px;
+  border-radius: 6px;
+  background: hsl(230, 25%, 20%);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.current-image .small-note { color: rgba(255,255,255,0.72); font-size: 0.9rem; }
+
+/* Espaciado y centrado de acciones del formulario (Guardar/Cancelar) */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  align-items: center;
+  justify-content: center;
+}

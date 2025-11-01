@@ -75,3 +75,25 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Tamaños tipográficos reutilizables (usar rem para escalar con la raíz) */
+:root {
+  --font-small: 0.9rem;
+  --font-base: 1rem;
+  --font-medium: 1.05rem;
+  --font-large: 1.15rem;
+  --font-xlarge: clamp(1.4rem, 2.5vw, 2.25rem);
+}
+
+/* Clase accesible para ocultar visualmente elementos pero mantenerlos disponibles para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

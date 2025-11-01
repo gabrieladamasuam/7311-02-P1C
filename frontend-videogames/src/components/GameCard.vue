@@ -6,12 +6,7 @@
     <p class="game-year">Año: {{ game.year }}</p>
 
     <div class="action-top">
-      <template v-if="game.playableComponent">
-        <button type="button" class="play-btn" @click="emit('play', game)">Ver más</button>
-      </template>
-      <template v-else>
-        <a class="play-link" :href="game.url" target="_blank">Ver más</a>
-      </template>
+      <a class="play-link" :href="game.url || '#'" target="_blank" rel="noopener">Ver más</a>
     </div>
 
     <div class="action-bottom" v-if="canEdit">
@@ -26,6 +21,7 @@ defineProps({
   game: { type: Object, required: true },
   canEdit: { type: Boolean, default: false }
 })
-const emit = defineEmits(['play', 'edit', 'delete'])
+
+const emit = defineEmits(['edit', 'delete'])
 
 </script>

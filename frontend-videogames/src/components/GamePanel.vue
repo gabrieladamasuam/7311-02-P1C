@@ -27,9 +27,9 @@
       </div>
     </div>
 
-    <!-- Mensajes de error -->
-    <div v-if="expiredMessage" class="message-expired">{{ expiredMessage }}</div>
-    <div v-if="fallbackMessage" class="message-fallback">{{ fallbackMessage }}</div>
+  <!-- Mensajes de error -->
+  <div v-if="expiredMessage" class="alert alert--danger">{{ expiredMessage }}</div>
+  <div v-if="fallbackMessage" class="alert alert--danger">{{ fallbackMessage }}</div>
 
     <!-- Vista de login -->
     <div v-if="showLoginView" class="auth-view">
@@ -51,7 +51,6 @@
             :key="game.id"
             :game="game"
             :can-edit="loggedIn"
-            @play="emit('play', game)"
             @edit="onEdit(game)"
             @delete="onDelete(game)"
           />
@@ -173,7 +172,21 @@ function handleModalSaved(game) {
 
 // Detectar token expirado
 function handleAuthExpired(e) {
-  expiredMessage.value = e.detail?.msg || 'El token ha expirado'
+  // Normalizar / traducir mensajes del backend a español
+  const raw = (e.detail?.msg || '').toString()
+  let userMsg = ''
+  if (/missing authorization header/i.test(raw) || /missing authorization/i.test(raw) || /missing auth/i.test(raw)) {
+    userMsg = 'Falta el encabezado de autorización (Authorization).'
+  } else if (/token has expired/i.test(raw) || /token expired/i.test(raw) || /expired token/i.test(raw) || /token expir/i.test(raw)) {
+    userMsg = 'El token ha expirado. Por favor, inicia sesión de nuevo.'
+  } else if (raw) {
+    // Si viene un mensaje en español ya, o cualquier otro texto, úsalo tal cual
+    userMsg = raw
+  } else {
+    userMsg = 'El token ha expirado.'
+  }
+
+  expiredMessage.value = userMsg
   localStorage.removeItem('access_token')
   loggedIn.value = false
 }

@@ -1,0 +1,194 @@
+[
+  {
+    "id": 0,
+    "name": "Tres en Raya",
+    "description": "El clásico juego de estrategia de toda la vida. Perfecto para retar desde aquí mismo a un amigo y ver quién consigue alinear tres fichas primero.",
+    "year": 2025,
+    "image": "/frontend-videogames/public/images/tictactoe.png",
+    "playableComponent": "TicTacToe"
+  },
+  {
+    "id": 1,
+    "name": "Hollow Knight: Silksong",
+    "description": "Secuela del aclamado Metroidvania: una aventura más difícil, con nuevas habilidades y secretos por descubrir.",
+    "year": 2025,
+    "image": "/frontend-videogames/public/images/hk_silksong.png",
+    "url": "https://hollowknightsilksong.com/"
+  },
+  {
+    "id": 2,
+    "name": "Marvel's Spider-Man 2",
+    "description": "Vive la emoción de balancearte por la ciudad de Nueva York con Peter Parker y Miles Morales en un juego de acción en mundo abierto lleno de supervillanos y momentos épicos.",
+    "year": 2023,
+    "image": "/frontend-videogames/public/images/spiderman2.png",
+    "url": "https://www.marvel.com/games/marvels-spider-man-2"
+  },
+  {
+    "id": 3,
+    "name": "EA SPORTS FC (FIFA)",
+    "description": "La experiencia de fútbol más realista: juega partidos intensos, compite online y gestiona tu plantilla con jugadores oficiales de todo el mundo.",
+    "year": 2023,
+    "image": "/frontend-videogames/public/images/fifa.png",
+    "url": "https://www.ea.com/es-es/games/ea-sports-fc"
+  },
+  {
+    "id": 4,
+    "name": "LEGO Star Wars: The Skywalker Saga",
+    "description": "Revive la saga completa de Star Wars con el humor y la creatividad de LEGO. Explora planetas, vive batallas espaciales y juega con tus personajes favoritos.",
+    "year": 2022,
+    "image": "/frontend-videogames/public/images/lego_starwars.png",
+    "url": "https://www.lego.com/es-es/themes/star-wars/games/skywalker-saga"
+  },
+  {
+    "id": 5,
+    "name": "Animal Crossing: New Horizons",
+    "description": "Escapa a tu propia isla y disfruta de la compañía de adorables vecinos animales: crea, decora y relájate.",
+    "year": 2020,
+    "image": "/frontend-videogames/public/images/animalcrossing.png",
+    "url": "https://animalcrossing.nintendo.com/es/"
+  },
+  {
+    "id": 6,
+    "name": "Cyberpunk 2077",
+    "description": "Sumérgete en un futuro distópico de neones y corporaciones. Un RPG en mundo abierto donde tus decisiones cambian la historia y los combates son intensos.",
+    "year": 2020,
+    "image": "/frontend-videogames/public/images/cb2077.png",
+    "url": "https://www.cyberpunk.net/es/es/"
+  },
+  {
+    "id": 7,
+    "name": "God of War",
+    "description": "Acompaña a Kratos y a Atreus en una épica aventura por la mitología nórdica, con combates brutales y una narrativa que emociona de principio a fin.",
+    "year": 2018,
+    "image": "/frontend-videogames/public/images/gow.png",
+    "url": "https://www.playstation.com/es-es/god-of-war/"
+  },
+  {
+    "id": 8,
+    "name": "Among Us",
+    "description": "Un juego multijugador social lleno de misterio y engaños. Colabora con tu tripulación o finge ser uno de ellos mientras siembras la duda como impostor.",
+    "year": 2018,
+    "image": "/frontend-videogames/public/images/amongus.png",
+    "url": "https://www.innersloth.com/gameAmongUs.php"
+  },
+  {
+    "id": 9,
+    "name": "Red Dead Redemption 2",
+    "description": "Un viaje inolvidable por el Salvaje Oeste, con una historia profunda, paisajes espectaculares y un mundo abierto que parece vivo en cada detalle.",
+    "year": 2018,
+    "image": "/frontend-videogames/public/images/rdr2.png",
+    "url": "https://www.rockstargames.com/es/reddeadredemption2"
+  },
+  {
+    "id": 10,
+    "name": "Hollow Knight",
+    "description": "Explora un reino subterráneo en este Metroidvania con combates, secretos escondidos y una atmósfera única difícil de igualar.",
+    "year": 2017,
+    "image": "/frontend-videogames/public/images/hollow_knight.png",
+    "url": "https://www.hollowknight.com/"
+  },
+  {
+    "id": 11,
+    "name": "Fortnite",
+    "description": "Un fenómeno multijugador social que combina battle royale y eventos en vivo que nunca dejan de sorprender.",
+    "year": 2017,
+    "image": "/frontend-videogames/public/images/fortnite.png",
+    "url": "https://www.fortnite.com/?lang=es-ES"
+  },
+  {
+    "id": 12,
+    "name": "Cuphead",
+    "description": "Combate contra jefes en este run and gun inspirado en los dibujos y música jazz de los años 30. Tan difícil que tendrás que pactar con el diablo.",
+    "year": 2017,
+    "image": "/frontend-videogames/public/images/cuphead.png",
+    "url": "https://cupheadgame.com/"
+  },
+  {
+    "id": 13,
+    "name": "LEGO Marvel Super Heroes",
+    "description": "Acción, humor y superhéroes en una divertida aventura al estilo LEGO, con personajes icónicos del universo Marvel para jugar y coleccionar.",
+    "year": 2013,
+    "image": "/frontend-videogames/public/images/lego_marvel.png",
+    "url": "https://www.lego.com/es-es/themes/marvel/games/super-heroes?icmp=LP-SHCC-Standard-Games_CC_Standard_Marvel_super_heroes-TH-NO-9I55J60OVT"
+  },
+  {
+    "id": 14,
+    "name": "Minecraft",
+    "description": "Crea un mundo abierto donde construir y explorar casi cualquier cosa que imagines, solo o con amigos.",
+    "year": 2011,
+    "image": "/frontend-videogames/public/images/minecraft.png",
+    "url": "https://minecraft.net/"
+  },
+  {
+    "id": 15,
+    "name": "League of Legends",
+    "description": "El MOBA más popular del mundo, con batallas estratégicas 5v5, campeones únicos y una comunidad competitiva enorme.",
+    "year": 2009,
+    "image": "/frontend-videogames/public/images/lol.png",
+    "url": "https://www.leagueoflegends.com/es-es/"
+  },
+  {
+    "id": 16,
+    "name": "LittleBigPlanet",
+    "description": "Un juego de plataformas creativo con adorables sackboys donde puedes diseñar tus propios niveles y compartirlos con la comunidad.",
+    "year": 2008,
+    "image": "/frontend-videogames/public/images/lbp.png",
+    "url": "https://www.lbpunion.com/"
+  },
+  {
+    "id": 17,
+    "name": "Roblox",
+    "description": "Plataforma de creación con experiencias de la comunidad: crea tus propios juegos o juega a los de otros con tus amigos.",
+    "year": 2006,
+    "image": "/frontend-videogames/public/images/roblox.png",
+    "url": "https://www.roblox.com/es"
+  },
+  {
+    "id": 18,
+    "name": "Call of Duty",
+    "description": "Una saga de acción en primera persona que mezcla campañas intensas con un multijugador frenético y competitivo.",
+    "year": 2003,
+    "image": "/frontend-videogames/public/images/cod.png",
+    "url": "https://www.callofduty.com/es/"
+  },
+  {
+    "id": 19,
+    "name": "The Sims",
+    "description": "Crea personajes, diseña casas y controla cada aspecto de su vida en este simulador social lleno de posibilidades.",
+    "year": 2000,
+    "image": "/frontend-videogames/public/images/sims.png",
+    "url": "https://www.ea.com/es-es/games/the-sims"
+  },
+  {
+    "id": 20,
+    "name": "Mortal Kombat",
+    "description": "El clásico de la lucha 1v1, famoso por sus combates intensos, sus fatalities brutales y su inolvidable plantel de luchadores.",
+    "year": 1992,
+    "image": "/frontend-videogames/public/images/mortal_kombat.png",
+    "url": "https://www.mortalkombat.com/es-es"
+  },
+  {
+    "id": 21,
+    "name": "Super Mario Kart",
+    "description": "Carreras frenéticas con Mario y compañía, en circuitos llenos de atajos, objetos locos y diversión garantizada en cada partida multijugador.",
+    "year": 1992,
+    "image": "/frontend-videogames/public/images/mario_kart.png",
+    "url": "https://mariokart8.nintendo.com/"
+  },
+  {
+    "id": 22,
+    "name": "The Legend of Zelda",
+    "description": "Una aventura legendaria de acción y exploración en un mundo de fantasía, con mazmorras, puzles y batallas que hicieron historia.",
+    "year": 1986,
+    "image": "/frontend-videogames/public/images/zelda.png",
+    "url": "https://zelda.com/"
+  },
+  {
+    "id": 23,
+    "name": "Super Mario Bros.",
+    "description": "El plataformas más clásico de todos. Acompaña a Mario y Luigi en mundos llenos de enemigos, secretos y aventuras inolvidables.",
+    "year": 1985,
+    "image": "/frontend-videogames/public/images/mario_bros.png",
+    "url": "https://mario.nintendo.com/"
+  }
+]

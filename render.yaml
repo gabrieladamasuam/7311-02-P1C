@@ -1,14 +1,15 @@
 version: "1"
 
 services:
-  # BACKEND FLASK
   - type: web
     name: backend-flask
     env: python
-    repo: https://github.com/gabrieladamasuam/7311-02-P1C
-    rootDir: backend-flask
+    runtime:
+      pythonVersion: "3.10.12"
     plan: free
     region: frankfurt
+    repo: https://github.com/gabrieladamasuam/7311-02-P1C
+    rootDir: backend-flask
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn api:api --bind 0.0.0.0:$PORT
     envVars:
@@ -19,10 +20,8 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
 
-  # FRONTEND VUE (STATIC)
-  - type: web
+  - type: static
     name: frontend-videogames
-    env: static
     repo: https://github.com/gabrieladamasuam/7311-02-P1C
     rootDir: frontend-videogames
     buildCommand: npm install && npm run build
@@ -35,4 +34,6 @@ databases:
   - name: videogames-db
     plan: free
     region: frankfurt
-    postgresMajorVersion: "18"
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere

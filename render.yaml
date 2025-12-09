@@ -1,6 +1,7 @@
 version: "1"
 
 services:
+  # BACKEND FLASK
   - type: web
     name: backend-flask
     env: python
@@ -20,8 +21,10 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
 
-  - type: static
+  # FRONTEND (VITE - STATIC)
+  - type: web
     name: frontend-videogames
+    env: static
     repo: https://github.com/gabrieladamasuam/7311-02-P1C
     rootDir: frontend-videogames
     buildCommand: npm install && npm run build

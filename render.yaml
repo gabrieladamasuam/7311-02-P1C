@@ -1,18 +1,17 @@
 version: "1"
 
 services:
-  # BACKEND FLASK (Python 3.10)
+  # BACKEND FLASK
   - type: web
     name: backend-flask
     env: python
+    runtime: python3.10
     repo: https://github.com/gabrieladamasuam/7311-02-P1C
     rootDir: backend-flask
     plan: free
     region: frankfurt
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn api:api --bind 0.0.0.0:$PORT
-    runtime:
-      pythonVersion: "3.10"
     envVars:
       - key: DATABASE_URL
         fromDatabase:

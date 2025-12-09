@@ -1,15 +1,48 @@
+version: "1"
+
 services:
+  # ---------------------------
+  # BACKEND FLASK (Python 3.10)
+  # ---------------------------
   - type: web
-    name: backend-flask-videogames
+    name: backend-flask
     env: python
+    repo: https://github.com/gabrieladamasuam/7311-02-P1C
+    rootDir: backend-flask
     plan: free
     region: frankfurt
-    branch: main
-    rootDir: backend-flask
-    envVars:
-      DATABASE_URL: ${DATABASE_URL}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn api:api --bind 0.0.0.0:$PORT
-    runtime:
-      pythonVersion: "3.10"
+
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: videogames-db
+          property: connectionString
+
+      - key: JWT_SECRET_KEY
+        generateValue: true
+
+  # ---------------------------
+  # FRONTEND VUE (Static site)
+  # ---------------------------
+  - type: web
+    name: frontend-videogames
+    env: static
+    repo: https://github.com/gabrieladamasuam/7311-02-P1C
+    rootDir: frontend-videogames
+    plan: free
+    region: frankfurt
+
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+
+    envVars:
+      - key: VITE_API_URL
+        value: https://backend-flask.onrender.com
+
+databases:
+  - name: videogames-db
+    region: frankfurt
+    plan: free

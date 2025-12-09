@@ -5,8 +5,7 @@ services:
   - type: web
     name: backend-flask
     env: python
-    runtime:
-      pythonVersion: "3.10.12"
+    runtime: python
     plan: free
     region: frankfurt
     repo: https://github.com/gabrieladamasuam/7311-02-P1C
@@ -21,7 +20,7 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
 
-  # FRONTEND (VITE - STATIC)
+  # FRONTEND (VITE – STATIC)
   - type: web
     name: frontend-videogames
     env: static

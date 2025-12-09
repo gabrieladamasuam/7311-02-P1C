@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: backend-flask-videogames
+    env: python
+    plan: free
+    region: frankfurt
+    branch: main
+    rootDir: backend-flask
+    envVars:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn api:api --bind 0.0.0.0:$PORT
+    runtime:
+      pythonVersion: "3.10"

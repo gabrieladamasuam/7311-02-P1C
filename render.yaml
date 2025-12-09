@@ -5,7 +5,6 @@ services:
   - type: web
     name: backend-flask
     env: python
-    runtime: python3.10
     repo: https://github.com/gabrieladamasuam/7311-02-P1C
     rootDir: backend-flask
     plan: free

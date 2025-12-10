@@ -227,7 +227,53 @@ def load_games():
 
     return jsonify({"msg": f"{added} juegos añadidos"})
 
+# --- INICIALIZACIÓN DE DATOS ---
+def initialize_data():
+    print("Comprobando datos iniciales...")
 
+    # --- Crear usuario admin dinámico desde env ---
+    admin_username = os.environ.get("ADMIN_USERNAME", "admin")
+    admin_password = os.environ.get("ADMIN_PASSWORD", "admin")
+
+    existing_admin = User.query.filter_by(username=admin_username).first()
+
+    if not existing_admin:
+        admin = User(
+            username=admin_username,
+            password=admin_password,
+            is_admin=True
+        )
+        db.session.add(admin)
+        print(f"Usuario admin creado (user: {admin_username}).")
+    else:
+        print("Usuario admin ya existe, no se crea uno nuevo.")
+
+    # --- Cargar juegos si no existen ---
+    json_path = os.path.join(os.path.dirname(__file__), "data", "games.json")
+
+    if os.path.exists(json_path) and Game.query.count() == 0:
+        with open(json_path, "r", encoding="utf-8") as f:
+            games = json.load(f)
+
+        for item in games:
+            game = Game(
+                name=item.get("name"),
+                year=item.get("year"),
+                url=item.get("url"),
+                image=item.get("image"),
+                description=item.get("description")
+            )
+            db.session.add(game)
+
+        print(f"🎮 {len(games)} juegos cargados desde games.json.")
+
+    db.session.commit()
+    print("Datos iniciales OK.")
+
+with api.app_context():
+    initialize_data()
+
+# --- EJECUCIÓN DE LA APP ---
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     api.run(host='0.0.0.0', port=port)

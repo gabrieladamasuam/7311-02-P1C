@@ -21,10 +21,12 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # --- CONFIG FLASK ---
-api.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-api.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-api.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'dev-secret')
-api.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+api.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+api.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# --- CONFIG JWT ---
+api.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "secret-dev")
+api.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 
 db = SQLAlchemy(api)
 jwt = JWTManager(api)
@@ -61,42 +63,49 @@ class User(db.Model):
 with api.app_context():
     db.create_all()
 
-    # ------ ADMIN AUTOMÁTICO ------
-    admin_username = os.environ.get("ADMIN_USERNAME", "admin")
-    admin_password = os.environ.get("ADMIN_PASSWORD", "admin")
+    admin_username = os.environ.get("ADMIN_USERNAME")
+    admin_password = os.environ.get("ADMIN_PASSWORD")
 
-    admin = User.query.filter_by(is_admin=True).first()
-    if not admin:
-        new_admin = User(
-            username=admin_username,
-            password=admin_password,
-            is_admin=True
-        )
-        db.session.add(new_admin)
-        db.session.commit()
-        print(">>> Admin creado automáticamente")
+    if admin_username and admin_password:
+        existing_admin = User.query.filter_by(username=admin_username).first()
 
-    # ------ CARGA DE JUEGOS SOLO SI LA TABLA ESTÁ VACÍA ------
-    if Game.query.count() == 0:
-        json_path = os.path.join(os.path.dirname(__file__), "data", "games.json")
-        if os.path.exists(json_path):
-            with open(json_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-
-            added = 0
-            for item in data:
-                game = Game(
-                    name=item.get("name"),
-                    year=item.get("year"),
-                    url=item.get("url"),
-                    image=item.get("image"),
-                    description=item.get("description")
-                )
-                db.session.add(game)
-                added += 1
-
+        if not existing_admin:
+            new_admin = User(
+                username=admin_username,
+                password=admin_password,
+                is_admin=True
+            )
+            db.session.add(new_admin)
             db.session.commit()
-            print(f">>> {added} juegos cargados automáticamente")
+            print(f"✔ Admin creado correctamente: {admin_username}")
+        else:
+            print("✔ Admin ya existente, no se crea otro.")
+    else:
+        print("⚠ No se pudo crear admin: faltan variables ADMIN_USERNAME o ADMIN_PASSWORD.")
+
+
+# --- FUNCIONES AUXILIARES ---
+def is_admin():
+    user = User.query.get(get_jwt_identity())
+    return user and user.is_admin
+
+# --- AUTENTICACIÓN ---
+@api.route("/auth/register", methods=["POST"])
+def register():
+    data = request.get_json() or {}
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        return jsonify({"msg": "Faltan datos"}), 400
+
+    if User.query.filter_by(username=username).first():
+        return jsonify({"msg": "El usuario ya existe"}), 400
+
+    new_user = User(username=username, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"msg": "Usuario creado"}), 201
 
 
 # --- RUTAS DE AUTENTICACIÓN ---
@@ -187,35 +196,36 @@ def delete_game(game_id):
     return jsonify({'msg': 'Juego eliminado'})
 
 
-# --- SUBIDA DE IMÁGENES ---
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-@api.route('/add_image', methods=['POST'])
+# ---- CARGA DE JSON AUTOMÁTICA ----
+@api.route('/admin/load-games', methods=['POST'])
 @jwt_required()
-def add_image():
+def load_games():
     if not is_admin():
-        return jsonify({'msg': 'Solo el administrador puede subir imágenes'}), 403
+        return jsonify({'msg': 'Solo el administrador puede cargar JSON'}), 403
 
-    if 'image' not in request.files:
-        return jsonify({'msg': 'No se envió ninguna imagen'}), 400
+    json_path = os.path.join(os.path.dirname(__file__), 'data', 'games.json')
 
-    file = request.files['image']
-    if file.filename == '':
-        return jsonify({'msg': 'Archivo no seleccionado'}), 400
-    if not allowed_file(file.filename):
-        return jsonify({'msg': 'Formato no permitido'}), 400
+    if not os.path.exists(json_path):
+        return jsonify({'msg': 'No existe el archivo games.json'}), 500
 
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    path = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(path)
+    with open(json_path, 'r', encoding='utf-8') as f:
+        items = json.load(f)
 
-    image_url = f"/images/{file.filename}"
-    return jsonify({'msg': 'Imagen subida correctamente', 'image_url': image_url}), 200
+    added = 0
+    for item in items:
+        if not Game.query.filter_by(name=item['name']).first():
+            game = Game(
+                name=item['name'],
+                year=item.get('year'),
+                url=item.get('url'),
+                image=item.get('image'),
+                description=item.get('description'),
+            )
+            db.session.add(game)
+            added += 1
+
+    db.session.commit()
+    return jsonify({'msg': f'{added} juegos añadidos'})
 
 
 # --- EJECUCIÓN DE LA APP ---

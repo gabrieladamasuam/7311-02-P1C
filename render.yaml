@@ -29,7 +29,7 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        value: https://backend-flask.onrender.com
+        value: https://backend-flask-0gh9.onrender.com
 
 databases:
   - name: videogames-db

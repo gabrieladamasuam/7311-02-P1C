@@ -2,17 +2,17 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
-  // Muestra el overlay de Vue DevTools solo si arrancas con VITE_DEVTOOLS=true
-  const enableDevtools = mode === 'development' && process.env.VITE_DEVTOOLS === 'true'
+export default defineConfig(async ({ mode }) => {
+  const plugins = [vue()]
+  if (mode === 'development' && process.env.VITE_DEVTOOLS === 'true') {
+    // Import dinámico (solo se evalúa en desarrollo, nunca en producción)
+    const { default: vueDevTools } = await import('vite-plugin-vue-devtools')
+    plugins.push(vueDevTools())
+  }
   return {
-    plugins: [
-      vue(),
-      enableDevtools && vueDevTools(),
-    ].filter(Boolean),
+    plugins,
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))

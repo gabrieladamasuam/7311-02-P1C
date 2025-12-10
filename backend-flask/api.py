@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -11,14 +11,16 @@ import json
 api = Flask(__name__)
 
 # --- CONFIG BASE DE DATOS ---
-DATABASE_URL = os.environ.get("DATABASE_URL")
+default_db_user = 'postgres'
+default_db_pass = '1234'
+default_db_name = 'videogames_db'
+default_db_host = 'localhost'
+default_db_port = '5432'
 
-if not DATABASE_URL:
-    raise Exception("DATABASE_URL no está definida en Render.")
-
-# Convertir postgres:// → postgresql://
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+default_postgres_url = (
+    f'postgresql://{default_db_user}:{default_db_pass}@{default_db_host}:{default_db_port}/{default_db_name}'
+)
+DATABASE_URL = os.environ.get('DATABASE_URL', default_postgres_url)
 
 # --- CONFIG FLASK ---
 api.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
@@ -57,9 +59,39 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
-# Crear tablas al iniciar
+
+# --- INICIALIZACIÓN AUTOMÁTICA ---
 with api.app_context():
     db.create_all()
+
+    admin_user = os.environ.get('ADMIN_USERNAME')
+    admin_pass = os.environ.get('ADMIN_PASSWORD')
+
+    if admin_user and admin_pass:
+        existing = User.query.filter_by(username=admin_user).first()
+        if not existing:
+            admin = User(username=admin_user, password=admin_pass, is_admin=True)
+            db.session.add(admin)
+            db.session.commit()
+
+    json_path = os.path.join(os.path.dirname(__file__), 'data', 'games.json')
+    if os.path.exists(json_path):
+        if Game.query.count() == 0:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                items = json.load(f)
+            for item in items:
+                if not item.get('name'):
+                    continue
+                game = Game(
+                    name=item['name'],
+                    year=item.get('year'),
+                    url=item.get('url'),
+                    image=item.get('image'),
+                    description=item.get('description')
+                )
+                db.session.add(game)
+            db.session.commit()
+
 
 # --- RUTAS DE AUTENTICACIÓN ---
 @api.route('/auth/register', methods=['POST'])
@@ -195,39 +227,5 @@ def add_image():
     return jsonify({'msg': 'Imagen subida correctamente', 'image_url': image_url}), 200
 
 
-# -------------- RUTA PARA CARGAR JUEGOS DESDE JSON --------------
-@api.route("/admin/load-games", methods=["POST"])
-@jwt_required()
-def load_games():
-    if not is_admin():
-        return jsonify({"msg": "Solo admin puede cargar juegos"}), 403
-
-    json_path = os.path.join(os.path.dirname(__file__), "data", "games.json")
-
-    if not os.path.exists(json_path):
-        return jsonify({"msg": "No existe games.json"}), 500
-
-    with open(json_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    added = 0
-    for item in data:
-        if not Game.query.filter_by(name=item["name"]).first():
-            game = Game(
-                name=item["name"],
-                year=item.get("year"),
-                url=item.get("url"),
-                image=item.get("image"),
-                description=item.get("description")
-            )
-            db.session.add(game)
-            added += 1
-
-    db.session.commit()
-
-    return jsonify({"msg": f"{added} juegos añadidos"})
-
-
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    api.run(host='0.0.0.0', port=port)
+    api.run(debug=True)

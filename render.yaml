@@ -4,8 +4,7 @@ services:
   # BACKEND FLASK
   - type: web
     name: backend-flask
-    runtime: python
-    pythonVersion: "3.10.12"
+    runtime: python:3.10.12
     plan: free
     region: frankfurt
     repo: https://github.com/gabrieladamasuam/7311-02-P1C

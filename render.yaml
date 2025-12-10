@@ -4,7 +4,7 @@ services:
   # BACKEND FLASK
   - type: web
     name: backend-flask
-    runtime: python:3.10.12
+    runtime: python
     plan: free
     region: frankfurt
     repo: https://github.com/gabrieladamasuam/7311-02-P1C
@@ -22,7 +22,7 @@ services:
   # FRONTEND (VITE – STATIC)
   - type: web
     name: frontend-videogames
-    env: static
+    runtime: static
     repo: https://github.com/gabrieladamasuam/7311-02-P1C
     rootDir: frontend-videogames
     buildCommand: npm install && npm run build

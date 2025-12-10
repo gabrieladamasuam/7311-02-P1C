@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -61,22 +61,45 @@ class User(db.Model):
 with api.app_context():
     db.create_all()
 
+    # ------ ADMIN AUTOMÁTICO ------
+    admin_username = os.environ.get("ADMIN_USERNAME", "admin")
+    admin_password = os.environ.get("ADMIN_PASSWORD", "admin")
+
+    admin = User.query.filter_by(is_admin=True).first()
+    if not admin:
+        new_admin = User(
+            username=admin_username,
+            password=admin_password,
+            is_admin=True
+        )
+        db.session.add(new_admin)
+        db.session.commit()
+        print(">>> Admin creado automáticamente")
+
+    # ------ CARGA DE JUEGOS SOLO SI LA TABLA ESTÁ VACÍA ------
+    if Game.query.count() == 0:
+        json_path = os.path.join(os.path.dirname(__file__), "data", "games.json")
+        if os.path.exists(json_path):
+            with open(json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            added = 0
+            for item in data:
+                game = Game(
+                    name=item.get("name"),
+                    year=item.get("year"),
+                    url=item.get("url"),
+                    image=item.get("image"),
+                    description=item.get("description")
+                )
+                db.session.add(game)
+                added += 1
+
+            db.session.commit()
+            print(f">>> {added} juegos cargados automáticamente")
+
+
 # --- RUTAS DE AUTENTICACIÓN ---
-@api.route('/auth/register', methods=['POST'])
-def register():
-    data = request.get_json() or {}
-    username = data.get('username')
-    password = data.get('password')
-    if not username or not password:
-        return jsonify({'msg': 'Falta nombre de usuario o contraseña'}), 400
-    if User.query.filter_by(username=username).first():
-        return jsonify({'msg': 'Ese usuario ya existe'}), 400
-    user = User(username=username, password=password)
-    db.session.add(user)
-    db.session.commit()
-    return jsonify({'msg': 'Usuario creado correctamente'}), 201
-
-
 @api.route('/auth/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
@@ -194,84 +217,6 @@ def add_image():
     image_url = f"/images/{file.filename}"
     return jsonify({'msg': 'Imagen subida correctamente', 'image_url': image_url}), 200
 
-
-# -------------- RUTA PARA CARGAR JUEGOS DESDE JSON --------------
-@api.route("/admin/load-games", methods=["POST"])
-@jwt_required()
-def load_games():
-    if not is_admin():
-        return jsonify({"msg": "Solo admin puede cargar juegos"}), 403
-
-    json_path = os.path.join(os.path.dirname(__file__), "data", "games.json")
-
-    if not os.path.exists(json_path):
-        return jsonify({"msg": "No existe games.json"}), 500
-
-    with open(json_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    added = 0
-    for item in data:
-        if not Game.query.filter_by(name=item["name"]).first():
-            game = Game(
-                name=item["name"],
-                year=item.get("year"),
-                url=item.get("url"),
-                image=item.get("image"),
-                description=item.get("description")
-            )
-            db.session.add(game)
-            added += 1
-
-    db.session.commit()
-
-    return jsonify({"msg": f"{added} juegos añadidos"})
-
-# --- INICIALIZACIÓN DE DATOS ---
-def initialize_data():
-    print("Comprobando datos iniciales...")
-
-    # --- Crear usuario admin dinámico desde env ---
-    admin_username = os.environ.get("ADMIN_USERNAME", "admin")
-    admin_password = os.environ.get("ADMIN_PASSWORD", "admin")
-
-    existing_admin = User.query.filter_by(username=admin_username).first()
-
-    if not existing_admin:
-        admin = User(
-            username=admin_username,
-            password=admin_password,
-            is_admin=True
-        )
-        db.session.add(admin)
-        print(f"Usuario admin creado (user: {admin_username}).")
-    else:
-        print("Usuario admin ya existe, no se crea uno nuevo.")
-
-    # --- Cargar juegos si no existen ---
-    json_path = os.path.join(os.path.dirname(__file__), "data", "games.json")
-
-    if os.path.exists(json_path) and Game.query.count() == 0:
-        with open(json_path, "r", encoding="utf-8") as f:
-            games = json.load(f)
-
-        for item in games:
-            game = Game(
-                name=item.get("name"),
-                year=item.get("year"),
-                url=item.get("url"),
-                image=item.get("image"),
-                description=item.get("description")
-            )
-            db.session.add(game)
-
-        print(f"🎮 {len(games)} juegos cargados desde games.json.")
-
-    db.session.commit()
-    print("Datos iniciales OK.")
-
-with api.app_context():
-    initialize_data()
 
 # --- EJECUCIÓN DE LA APP ---
 if __name__ == '__main__':

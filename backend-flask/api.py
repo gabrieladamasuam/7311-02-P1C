@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -21,12 +21,10 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # --- CONFIG FLASK ---
-api.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
-api.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# --- CONFIG JWT ---
-api.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "secret-dev")
-api.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+api.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+api.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+api.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'dev-secret')
+api.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 
 db = SQLAlchemy(api)
 jwt = JWTManager(api)
@@ -63,52 +61,22 @@ class User(db.Model):
 with api.app_context():
     db.create_all()
 
-    admin_username = os.environ.get("ADMIN_USERNAME")
-    admin_password = os.environ.get("ADMIN_PASSWORD")
-
-    if admin_username and admin_password:
-        existing_admin = User.query.filter_by(username=admin_username).first()
-
-        if not existing_admin:
-            new_admin = User(
-                username=admin_username,
-                password=admin_password,
-                is_admin=True
-            )
-            db.session.add(new_admin)
-            db.session.commit()
-            print(f"✔ Admin creado correctamente: {admin_username}")
-        else:
-            print("✔ Admin ya existente, no se crea otro.")
-    else:
-        print("⚠ No se pudo crear admin: faltan variables ADMIN_USERNAME o ADMIN_PASSWORD.")
-
-
-# --- FUNCIONES AUXILIARES ---
-def is_admin():
-    user = User.query.get(get_jwt_identity())
-    return user and user.is_admin
-
-# --- AUTENTICACIÓN ---
-@api.route("/auth/register", methods=["POST"])
+# --- RUTAS DE AUTENTICACIÓN ---
+@api.route('/auth/register', methods=['POST'])
 def register():
     data = request.get_json() or {}
-    username = data.get("username")
-    password = data.get("password")
-
+    username = data.get('username')
+    password = data.get('password')
     if not username or not password:
-        return jsonify({"msg": "Faltan datos"}), 400
-
+        return jsonify({'msg': 'Falta nombre de usuario o contraseña'}), 400
     if User.query.filter_by(username=username).first():
-        return jsonify({"msg": "El usuario ya existe"}), 400
-
-    new_user = User(username=username, password=password)
-    db.session.add(new_user)
+        return jsonify({'msg': 'Ese usuario ya existe'}), 400
+    user = User(username=username, password=password)
+    db.session.add(user)
     db.session.commit()
-    return jsonify({"msg": "Usuario creado"}), 201
+    return jsonify({'msg': 'Usuario creado correctamente'}), 201
 
 
-# --- RUTAS DE AUTENTICACIÓN ---
 @api.route('/auth/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
@@ -196,39 +164,70 @@ def delete_game(game_id):
     return jsonify({'msg': 'Juego eliminado'})
 
 
-# ---- CARGA DE JSON AUTOMÁTICA ----
-@api.route('/admin/load-games', methods=['POST'])
+# --- SUBIDA DE IMÁGENES ---
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@api.route('/add_image', methods=['POST'])
+@jwt_required()
+def add_image():
+    if not is_admin():
+        return jsonify({'msg': 'Solo el administrador puede subir imágenes'}), 403
+
+    if 'image' not in request.files:
+        return jsonify({'msg': 'No se envió ninguna imagen'}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'msg': 'Archivo no seleccionado'}), 400
+    if not allowed_file(file.filename):
+        return jsonify({'msg': 'Formato no permitido'}), 400
+
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    path = os.path.join(UPLOAD_FOLDER, file.filename)
+    file.save(path)
+
+    image_url = f"/images/{file.filename}"
+    return jsonify({'msg': 'Imagen subida correctamente', 'image_url': image_url}), 200
+
+
+# -------------- RUTA PARA CARGAR JUEGOS DESDE JSON --------------
+@api.route("/admin/load-games", methods=["POST"])
 @jwt_required()
 def load_games():
     if not is_admin():
-        return jsonify({'msg': 'Solo el administrador puede cargar JSON'}), 403
+        return jsonify({"msg": "Solo admin puede cargar juegos"}), 403
 
-    json_path = os.path.join(os.path.dirname(__file__), 'data', 'games.json')
+    json_path = os.path.join(os.path.dirname(__file__), "data", "games.json")
 
     if not os.path.exists(json_path):
-        return jsonify({'msg': 'No existe el archivo games.json'}), 500
+        return jsonify({"msg": "No existe games.json"}), 500
 
-    with open(json_path, 'r', encoding='utf-8') as f:
-        items = json.load(f)
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
     added = 0
-    for item in items:
-        if not Game.query.filter_by(name=item['name']).first():
+    for item in data:
+        if not Game.query.filter_by(name=item["name"]).first():
             game = Game(
-                name=item['name'],
-                year=item.get('year'),
-                url=item.get('url'),
-                image=item.get('image'),
-                description=item.get('description'),
+                name=item["name"],
+                year=item.get("year"),
+                url=item.get("url"),
+                image=item.get("image"),
+                description=item.get("description")
             )
             db.session.add(game)
             added += 1
 
     db.session.commit()
-    return jsonify({'msg': f'{added} juegos añadidos'})
+
+    return jsonify({"msg": f"{added} juegos añadidos"})
 
 
-# --- EJECUCIÓN DE LA APP ---
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     api.run(host='0.0.0.0', port=port)

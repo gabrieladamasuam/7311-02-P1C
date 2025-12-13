@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -10,7 +10,6 @@ import json
 
 api = Flask(__name__)
 
-# --- CONFIG BASE DE DATOS ---
 default_db_user = 'postgres'
 default_db_pass = '1234'
 default_db_name = 'videogames_db'
@@ -22,7 +21,6 @@ default_postgres_url = (
 )
 DATABASE_URL = os.environ.get('DATABASE_URL', default_postgres_url)
 
-# --- CONFIG FLASK ---
 api.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 api.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 api.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'dev-secret')
@@ -33,7 +31,6 @@ jwt = JWTManager(api)
 CORS(api)
 
 
-# --- MODELOS ---
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
@@ -60,7 +57,6 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
 
-# --- INICIALIZACIÓN AUTOMÁTICA ---
 with api.app_context():
     db.create_all()
 
@@ -93,7 +89,6 @@ with api.app_context():
             db.session.commit()
 
 
-# --- RUTAS DE AUTENTICACIÓN ---
 @api.route('/auth/register', methods=['POST'])
 def register():
     data = request.get_json() or {}
@@ -121,7 +116,6 @@ def login():
     return jsonify({'access_token': token}), 200
 
 
-# --- RUTAS DE JUEGOS ---
 def is_admin():
     user = User.query.get(get_jwt_identity())
     return user and user.is_admin
@@ -129,7 +123,7 @@ def is_admin():
 
 @api.route('/games', methods=['GET'])
 def list_games():
-    limit = int(request.args.get('limit', 10))
+    limit = int(request.args.get('limit', 100))
     skip = int(request.args.get('skip', 0))
     query = Game.query.order_by(Game.id)
     total = query.count()
@@ -196,9 +190,9 @@ def delete_game(game_id):
     return jsonify({'msg': 'Juego eliminado'})
 
 
-# --- SUBIDA DE IMÁGENES ---
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -223,8 +217,13 @@ def add_image():
     path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(path)
 
-    image_url = f"/images/{file.filename}"
+    image_url = f'/images/{file.filename}'
     return jsonify({'msg': 'Imagen subida correctamente', 'image_url': image_url}), 200
+
+
+@api.route('/images/<filename>')
+def serve_image(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 
 if __name__ == '__main__':

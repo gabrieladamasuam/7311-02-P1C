@@ -61,15 +61,8 @@ async function handleSubmit() {
 
   loading.value = true
   try {
-    // En producción solo permitimos imágenes locales (no URLs externas)
-    if (form.image && (form.image.startsWith('http://') || form.image.startsWith('https://'))) {
-      throw new Error('Solo se permiten imágenes locales. Sube la imagen desde el modal "Añadir imagen" y usa el nombre de fichero o /images/<archivo>.')
-    }
-
-    // Normalizar la ruta de imagen: aceptar tanto "archivo.png" como "/images/archivo.png"
-    const imgName = form.image ? form.image.split('/').pop() : ''
-    const payload = { ...form, image: imgName ? `/images/${imgName}` : '' }
-
+    // Preparamos los datos
+    const payload = { ...form }
     const res = isEditing.value
       ? await api.put(`/games/${props.game.id}`, payload)
       : await api.post('/games', payload)

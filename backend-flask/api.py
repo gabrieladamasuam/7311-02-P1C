@@ -20,6 +20,10 @@ default_postgres_url = (
     f'postgresql://{default_db_user}:{default_db_pass}@{default_db_host}:{default_db_port}/{default_db_name}'
 )
 DATABASE_URL = os.environ.get('DATABASE_URL', default_postgres_url)
+BASE_URL = os.environ.get(
+    'PUBLIC_BASE_URL',
+    'http://localhost:5000'
+)
 
 api.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 api.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -217,9 +221,8 @@ def add_image():
     path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(path)
 
-    image_url = f'/images/{file.filename}'
+    image_url = f'{BASE_URL}/images/{file.filename}'
     return jsonify({'msg': 'Imagen subida correctamente', 'image_url': image_url}), 200
-
 
 @api.route('/images/<filename>')
 def serve_image(filename):

@@ -101,9 +101,18 @@ async function loadGames() {
     const res = await api.get('/games?limit=1000')
     const normalizeImage = img => {
       if (!img) return null
-      if (img.startsWith('http') || img.startsWith('/images/')) return img
-      const parts = img.split('/')
-      return `/images/${parts[parts.length - 1]}`
+
+      // URLs completas (backend o externas)
+      if (img.startsWith('http://') || img.startsWith('https://')) {
+        return img
+      }
+
+      // Imágenes antiguas del frontend
+      if (img.startsWith('/frontend-videogames/public/')) {
+        return img.replace('/frontend-videogames/public', '')
+      }
+
+      return img
     }
     games.value = res.data.games.map(g => ({
       ...g,
